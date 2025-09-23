@@ -189,11 +189,11 @@ export function MenuDragAble() {
                                     </SortableContext>
                                 </li>
                             ))}
-                            {!collapsed && (
+                            {/* {!collapsed && (
                                 <li className="w-full grow flex items-end">
                                     <MenuWidget />
                                 </li>
-                            )}
+                            )} */}
                         </ul>
                     </nav>
                 </DndContext>

@@ -13,28 +13,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/ui/icon"
-import { signOut, auth } from "@/lib/auth";
 import Image from "next/image";
 import { Link } from '@/i18n/routing';
 
 const ProfileInfo = async () => {
-  const session = await auth();
   return (
     <div className="md:block hidden">
       <DropdownMenu>
         <DropdownMenuTrigger asChild className=" cursor-pointer">
           <div className=" flex items-center gap-3  text-default-800 ">
-
-            <Image
-              src={session?.user?.image as string}
-              alt={session?.user?.name?.charAt(0) as string}
+          <Image
+              src="/images/avatar/av-1.jpg"
+              alt="dashcode"
               width={36}
               height={36}
               className="rounded-full"
             />
 
             <div className="text-sm font-medium  capitalize lg:block hidden  ">
-              {session?.user?.name}
+              Jhon Doe
             </div>
             <span className="text-base  me-2.5 lg:inline-block hidden">
               <Icon icon="heroicons-outline:chevron-down"></Icon>
@@ -45,8 +42,8 @@ const ProfileInfo = async () => {
           <DropdownMenuLabel className="flex gap-2 items-center mb-1 p-3">
 
             <Image
-              src={session?.user?.image as string}
-              alt={session?.user?.name?.charAt(0) as string}
+              src="/images/avatar/av-1.jpg"
+              alt="dashcode"
               width={36}
               height={36}
               className="rounded-full"
@@ -54,13 +51,13 @@ const ProfileInfo = async () => {
 
             <div>
               <div className="text-sm font-medium text-default-800 capitalize ">
-                {session?.user?.name}
+                Jhon Doe
               </div>
               <Link
                 href="/dashboard"
                 className="text-xs text-default-600 hover:text-primary"
               >
-                {session?.user?.email}
+                info@codeshaper.net
               </Link>
             </div>
           </DropdownMenuLabel>
@@ -181,10 +178,7 @@ const ProfileInfo = async () => {
 
             <div>
               <form
-                action={async () => {
-                  "use server";
-                  await signOut();
-                }}
+               
               >
                 <button type="submit" className=" w-full  flex  items-center gap-2" >
                   <Icon icon="heroicons:power" className="w-4 h-4" />

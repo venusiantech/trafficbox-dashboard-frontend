@@ -9,7 +9,7 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 import { MenuClassic } from "./menu-classic";
-import DashCodeLogo from "@/components/dascode-logo";
+import Image from "next/image";
 import { useMobileMenuConfig } from "@/hooks/use-mobile-menu";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useConfig } from "@/hooks/use-config";
@@ -34,10 +34,7 @@ export function SheetMenu() {
             <SheetContent className="sm:w-72 px-3 h-full flex flex-col" side="left">
                 <SheetHeader>
                     <Link href="/dashboard/analytics" className="flex gap-2 items-center     ">
-                        <DashCodeLogo className="  text-default-900 h-8 w-8 [&>path:nth-child(3)]:text-background [&>path:nth-child(2)]:text-background" />
-                        <h1 className="text-xl font-semibold text-default-900 ">
-                            DashCode
-                        </h1>
+                        <Image src="/logo/trafficboxes_logo_full.png" alt="logo" width={150} height={100} />
                     </Link>
                 </SheetHeader>
                 <MenuClassic />

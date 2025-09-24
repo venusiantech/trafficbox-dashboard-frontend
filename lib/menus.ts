@@ -51,38 +51,11 @@ export function getMenuList(pathname: string, t: any): Group[] {
               icon: "heroicons:arrow-trending-up",
               children: [],
             },
-            // {
-            //   href: "/dashboard/dash-ecom",
-            //   label: t("ecommerce"),
-            //   active: pathname === "/dashboard/dash-ecom",
-            //   icon: "heroicons:shopping-cart",
-            //   children: [],
-            // },
-            // {
-            //   href: "/dashboard/project",
-            //   label: t("project"),
-            //   active: pathname === "/dashboard/project",
-            //   icon: "heroicons:document",
-            //   children: [],
-            // },
-            // {
-            //   href: "/dashboard/crm",
-            //   label: t("crm"),
-            //   active: pathname === "/dashboard/crm",
-            //   icon: "heroicons:share",
-            //   children: [],
-            // },
-            // {
-            //   href: "/dashboard/banking",
-            //   label: t("banking"),
-            //   active: pathname === "/dashboard/banking",
-            //   icon: "heroicons:credit-card",
-            //   children: [],
-            // },
           ],
         },
       ],
     },
+    
   ];
 }
 export function getHorizontalMenuList(pathname: string, t: any): Group[] {
@@ -105,39 +78,11 @@ export function getHorizontalMenuList(pathname: string, t: any): Group[] {
               icon: "heroicons:arrow-trending-up",
               children: [],
             },
-            // {
-            //   href: "/dashboard/dash-ecom",
-            //   label: t("ecommerce"),
-            //   active: pathname === "/dashboard/dash-ecom",
-            //   icon: "heroicons:shopping-cart",
-            //   children: [],
-            // },
-            // {
-            //   href: "/dashboard/project",
-            //   label: t("project"),
-            //   active: pathname === "/dashboard/project",
-            //   icon: "heroicons:document",
-            //   children: [],
-            // },
-            // {
-            //   href: "/dashboard/crm",
-            //   label: t("crm"),
-            //   active: pathname === "/dashboard/crm",
-            //   icon: "heroicons:share",
-            //   children: [],
-            // },
-            // {
-            //   href: "/dashboard/banking",
-            //   label: t("banking"),
-            //   active: pathname === "/dashboard/banking",
-            //   icon: "heroicons:credit-card",
-            //   children: [],
-            // },
           ],
         },
       ],
     },
+
+    
   ];
 }
-
-

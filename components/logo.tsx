@@ -1,10 +1,10 @@
 'use client'
 import React from "react";
-import DashCodeLogo from "./dascode-logo";
 import { Link } from '@/i18n/routing';
 import { useConfig } from "@/hooks/use-config";
 import { useMenuHoverConfig } from "@/hooks/use-menu-hover";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import Image from "next/image";
 
 
 
@@ -16,19 +16,16 @@ const Logo = () => {
 
     if (config.sidebar === 'compact') {
         return <Link href="/dashboard/analytics" className="flex gap-2 items-center   justify-center    ">
-            <DashCodeLogo className="  text-default-900 h-8 w-8 [&>path:nth-child(3)]:text-background [&>path:nth-child(2)]:text-background" />
-
+            <Image src="/logo/trafficboxes_logo.png" alt="logo" width={32} height={32} />
         </Link>
     }
     if (config.sidebar === 'two-column' || !isDesktop) return null
 
     return (
         <Link href="/dashboard/analytics" className="flex gap-2 items-center    ">
-            <DashCodeLogo className="  text-default-900 h-8 w-8 [&>path:nth-child(3)]:text-background [&>path:nth-child(2)]:text-background" />
             {(!config?.collapsed || hovered) && (
-                <h1 className="text-xl font-semibold text-default-900 ">
-                    DashCode
-                </h1>
+              <Image src="/logo/trafficboxes_logo_full.png" alt="logo" width={150} height={100} />
+
             )}
         </Link>
 

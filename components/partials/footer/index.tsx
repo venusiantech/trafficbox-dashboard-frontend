@@ -9,18 +9,8 @@ const DashCodeFooter = async () => {
     <FooterContent>
       <div className=" md:flex  justify-between text-default-600 hidden">
         <div className="text-center md:ltr:text-start md:rtl:text-right text-sm">
-          COPYRIGHT &copy; {new Date().getFullYear()} DashCode, All rights
+          COPYRIGHT &copy; {new Date().getFullYear()} Trafficboxes, All rights
           Reserved
-        </div>
-        <div className="md:ltr:text-right md:rtl:text-end text-center text-sm">
-          Hand-crafted & Made by{" "}
-          <a
-            href="https://codeshaper.net"
-            target="_blank"
-            className="text-primary font-semibold"
-          >
-            Codeshaper
-          </a>
         </div>
       </div>
       <div className="flex md:hidden justify-around items-center">
@@ -42,7 +32,7 @@ const DashCodeFooter = async () => {
           <div className="h-[50px] w-[50px] rounded-full relative left-[0px] top-[0px] custom-dropshadow">
             <Image
               src="/images/avatar/av-1.jpg"
-              alt="dashcode"
+              alt="trafficboxes"
               width={50}
               height={50}
               className="w-full h-full rounded-full border-2"

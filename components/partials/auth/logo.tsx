@@ -9,8 +9,8 @@ const Logo = () => {
       <Image
         src={
           mode === "light"
-            ? "/images/logo/logo.svg"
-            : "/images/logo/logo-white.svg"
+            ? "/logo/trafficboxes_logo_full.png"
+            : "/logo/trafficboxes_logo_full.png"
         }
         alt=""
         width={300}

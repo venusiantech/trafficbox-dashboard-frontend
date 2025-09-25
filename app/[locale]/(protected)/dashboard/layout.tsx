@@ -2,8 +2,8 @@ import PageTitle from "@/components/page-title";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dashcode Next Js",
-  description: "Dashcode is a popular dashboard template.",
+  title: "Trafficboxes",
+  description: "Trafficboxes",
 };
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return <>

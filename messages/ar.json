@@ -3,7 +3,7 @@
     "title": " مرحبا بك في موقعنا"
   },
   "AnalyticsDashboard": {
-    "widget_title": "قم بتحديث Dashcode الخاص بك",
+    "widget_title": "قم بتحديث Trafficboxes الخاص بك",
     "widget_desc": "خطة احترافية للحصول على نتائج أفضل",
     "widget_badge": "الآن",
     "revenue_chart_title": "إجمالي الإيرادات",
@@ -24,7 +24,7 @@
   },
   "BankingDashboard": {
     "widget_title": "مساء الخير",
-    "widget_desc": "مرحبًا بك في داشكود",
+    "widget_desc": "مرحبًا بك في Trafficboxes",
     "current_balance": "الرصيد الحالي",
     "credit": "ائتمان",
     "debit": "مدين",
@@ -54,7 +54,7 @@
   },
   "EcommerceDashboard": {
     "widget_title": "مساء الخير",
-    "widget_desc": "مرحبًا بكم في داشكود",
+    "widget_desc": "مرحبًا بكم في Trafficboxes",
     "revenue_chart_title": "إجمالي الإيرادات",
     "revenue_report": "تقرير الإيرادات",
     "sold_chart_title": "المنتجات المباعة",

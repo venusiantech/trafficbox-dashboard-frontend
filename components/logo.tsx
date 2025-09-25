@@ -24,7 +24,7 @@ const Logo = () => {
     return (
         <Link href="/dashboard/analytics" className="flex gap-2 items-center    ">
             {(!config?.collapsed || hovered) && (
-              <Image src="/logo/trafficboxes_logo_full.png" alt="logo" width={150} height={100} />
+              <Image src="/logo/trafficboxes_logo_full.png" priority alt="logo" width={150} height={100} />
 
             )}
         </Link>

@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react'
 import HeaderContent from './header-content'
 import HeaderSearch from './header-search'
@@ -11,17 +13,16 @@ import HorizontalMenu from "./horizontal-menu"
 import LocalSwitcher from './locale-switcher'
 import HeaderLogo from "./header-logo"
 
-
-const DashCodeHeader = async () => {
+const DashCodeHeader = () => {
     return (
         <>
             <HeaderContent>
-                <div className=' flex gap-3 items-center'>
+                <div className='flex gap-3 items-center'>
                     <HeaderLogo />
                     <SidebarToggle />
                     <HeaderSearch />
                 </div>
-                <div className="nav-tools flex items-center  md:gap-4 gap-3">
+                <div className="nav-tools flex items-center md:gap-4 gap-3">
                     <LocalSwitcher />
                     <ThemeSwitcher />
                     <Messages />

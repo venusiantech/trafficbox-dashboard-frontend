@@ -5,7 +5,7 @@ import Image from 'next/image'
 const config: DocsThemeConfig = {
   logo: (
     <span className=" inline-flex gap-2.5 items-center">
-      <Image src="/logo/trafficboxes_logo_full.png" alt="logo" width={150} height={100} />
+      <Image src="/logo/trafficboxes_logo_full.png" priority alt="logo" width={150} height={100} />
     </span>
   ),
   project: {

@@ -34,7 +34,7 @@ export function SheetMenu() {
             <SheetContent className="sm:w-72 px-3 h-full flex flex-col" side="left">
                 <SheetHeader>
                     <Link href="/dashboard/analytics" className="flex gap-2 items-center     ">
-                        <Image src="/logo/trafficboxes_logo_full.png" alt="logo" width={150} height={100} />
+                        <Image src="/logo/trafficboxes_logo_full.png" priority alt="logo" width={150} height={100} />
                     </Link>
                 </SheetHeader>
                 <MenuClassic />

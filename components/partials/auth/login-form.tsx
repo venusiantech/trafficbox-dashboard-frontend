@@ -13,15 +13,21 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "@/components/navigation";
+import { useAuthStore } from "@/context/authStore";
 
 const schema = z.object({
   email: z.string().email({ message: "Your email is invalid." }),
   password: z.string().min(4),
 });
+
+type FormValues = z.infer<typeof schema>;
+
 const LoginForm = () => {
   const [isPending, startTransition] = React.useTransition();
   const router = useRouter();
   const [passwordType, setPasswordType] = React.useState("password");
+  const login = useAuthStore((state) => state.login);
+  const error = useAuthStore((state) => state.error);
 
   const togglePasswordType = () => {
     if (passwordType === "text") {
@@ -30,26 +36,24 @@ const LoginForm = () => {
       setPasswordType("text");
     }
   };
+  
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: "all",
-    defaultValues: {
-      email: "dashcode@codeshaper.net",
-      password: "password",
-    },
   });
 
-  const onSubmit = (data: z.infer<typeof schema>) => {
+  const onSubmit = (data: FormValues) => {
     startTransition(async () => {
       try {
-        router.push("/dashboard/analytics");
+        await login(data.email, data.password);
         toast.success("Successfully logged in");
+        router.push("/dashboard/analytics");
       } catch (err: any) {
-        toast.error(err.message);
+        toast.error(err.message || "Login failed");
       }
     });
   };
@@ -66,6 +70,7 @@ const LoginForm = () => {
           {...register("email")}
           type="email"
           id="email"
+          placeholder="example@email.com"
           className={cn("", {
             "border-destructive ": errors.email,
           })}
@@ -88,8 +93,8 @@ const LoginForm = () => {
             {...register("password")}
             type={passwordType}
             id="password"
-            className="peer  "
-            placeholder=" "
+            className="peer"
+            placeholder="••••••••"
           />
 
           <div

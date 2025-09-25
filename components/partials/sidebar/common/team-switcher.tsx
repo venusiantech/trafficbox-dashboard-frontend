@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { useSession } from "next-auth/react";
 import { ChevronsUpDown, Check, CirclePlus } from 'lucide-react';
+import { useAuthStore } from "@/context/authStore";
 
 import { cn } from "@/lib/utils"
 import {
@@ -83,7 +83,7 @@ export default function TeamSwitcher({ className }: TeamSwitcherProps) {
     const [config] = useConfig();
     const [hoverConfig] = useMenuHoverConfig();
     const { hovered } = hoverConfig;
-    const { data: session } = useSession();
+    const { user } = useAuthStore();
     const [open, setOpen] = React.useState(false)
     const [showNewTeamDialog, setShowNewTeamDialog] = React.useState(false)
     const [selectedTeam, setSelectedTeam] = React.useState<Team>(
@@ -122,7 +122,7 @@ export default function TeamSwitcher({ className }: TeamSwitcherProps) {
                                     className="grayscale"
                                 />
 
-                                <AvatarFallback>{session?.user?.name?.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>{user?.firstName?.charAt(0) || 'U'}</AvatarFallback>
                             </Avatar>
                         </Button> : <Button
                             variant="outline"
@@ -143,7 +143,7 @@ export default function TeamSwitcher({ className }: TeamSwitcherProps) {
                                         className="grayscale"
                                     />
 
-                                    <AvatarFallback>{session?.user?.name?.charAt(0)}</AvatarFallback>
+                                    <AvatarFallback>{user?.firstName?.charAt(0) || 'U'}</AvatarFallback>
                                 </Avatar>
                                 <div className="flex-1 text-start w-[100px]">
 

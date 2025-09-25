@@ -1,12 +1,13 @@
 'use client'
-import { SessionProvider } from "next-auth/react"
 import React from 'react'
+import AuthInit from './auth-init'
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return (
-        <SessionProvider>
+        <>
+            <AuthInit />
             {children}
-        </SessionProvider>
+        </>
     )
 }
 

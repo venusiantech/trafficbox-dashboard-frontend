@@ -1,3 +1,4 @@
+"use client";
 
 import {
   DropdownMenu,
@@ -15,50 +16,93 @@ import {
 import { Icon } from "@/components/ui/icon"
 import Image from "next/image";
 import { Link } from '@/i18n/routing';
+import { useAuthStore } from "@/context/authStore";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useState } from "react";
 
-const ProfileInfo = async () => {
+const ProfileInfo = () => {
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await logout();
+      toast.success("Logged out successfully");
+      router.push("/en/auth/login");
+    } catch (error) {
+      toast.error("Failed to logout");
+      console.error("Logout error:", error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  // Get user initials for avatar fallback
+  const getInitials = () => {
+    if (!user) return "U";
+    return `${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`;
+  };
+
+  // Get full name
+  const getFullName = () => {
+    if (!user) return "Guest User";
+    return `${user.firstName || ""} ${user.lastName || ""}`.trim();
+  };
+
   return (
     <div className="md:block hidden">
       <DropdownMenu>
-        <DropdownMenuTrigger asChild className=" cursor-pointer">
-          <div className=" flex items-center gap-3  text-default-800 ">
-          <Image
-              src="/images/avatar/av-1.jpg"
-              alt="dashcode"
-              width={36}
-              height={36}
-              className="rounded-full"
-            />
+        <DropdownMenuTrigger asChild className="cursor-pointer">
+          <div className="flex items-center gap-3 text-default-800">
+            {user?.firstName ? (
+              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                {getInitials()}
+              </div>
+            ) : (
+              <Image
+                src="/images/avatar/av-1.jpg"
+                alt="user avatar"
+                width={36}
+                height={36}
+                className="rounded-full"
+              />
+            )}
 
-            <div className="text-sm font-medium  capitalize lg:block hidden  ">
-              Jhon Doe
+            <div className="text-sm font-medium capitalize lg:block hidden">
+              {getFullName()}
             </div>
-            <span className="text-base  me-2.5 lg:inline-block hidden">
+            <span className="text-base me-2.5 lg:inline-block hidden">
               <Icon icon="heroicons-outline:chevron-down"></Icon>
             </span>
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56 p-0" align="end">
           <DropdownMenuLabel className="flex gap-2 items-center mb-1 p-3">
-
-            <Image
-              src="/images/avatar/av-1.jpg"
-              alt="dashcode"
-              width={36}
-              height={36}
-              className="rounded-full"
-            />
+            {user?.firstName ? (
+              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                {getInitials()}
+              </div>
+            ) : (
+              <Image
+                src="/images/avatar/av-1.jpg"
+                alt="user avatar"
+                width={36}
+                height={36}
+                className="rounded-full"
+              />
+            )}
 
             <div>
-              <div className="text-sm font-medium text-default-800 capitalize ">
-                Jhon Doe
+              <div className="text-sm font-medium text-default-800 capitalize">
+                {getFullName()}
               </div>
-              <Link
-                href="/dashboard"
-                className="text-xs text-default-600 hover:text-primary"
-              >
-                info@codeshaper.net
-              </Link>
+              <div className="text-xs text-default-600">
+                {user?.email || "guest@example.com"}
+              </div>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuGroup>
@@ -172,20 +216,12 @@ const ProfileInfo = async () => {
           </DropdownMenuGroup>
           <DropdownMenuSeparator className="mb-0 dark:bg-background" />
           <DropdownMenuItem
-
+            onClick={handleLogout}
+            disabled={isLoggingOut}
             className="flex items-center gap-2 text-sm font-medium text-default-600 capitalize my-1 px-3 cursor-pointer"
           >
-
-            <div>
-              <form
-               
-              >
-                <button type="submit" className=" w-full  flex  items-center gap-2" >
-                  <Icon icon="heroicons:power" className="w-4 h-4" />
-                  Log out
-                </button>
-              </form>
-            </div>
+            <Icon icon="heroicons:power" className="w-4 h-4" />
+            {isLoggingOut ? "Logging out..." : "Log out"}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -55,7 +55,35 @@ export function getMenuList(pathname: string, t: any): Group[] {
         },
       ],
     },
-    
+    {
+      groupLabel: t("campaign"),
+      id: "campaign",
+      menus: [
+        {
+          id: "campaign",
+          href: "/dashboard/campaign",
+          label: t("campaign"),
+          active: pathname.includes("/dashboard/campaign"),
+          icon: "heroicons-outline:speakerphone",
+          submenus: [
+            {
+              href: "/dashboard/campaign/create",
+              label: t("create_campaign"),
+              active: pathname === "/dashboard/campaign/create",
+              icon: "heroicons:plus-circle",
+              children: [],
+            },
+            {
+              href: "/dashboard/campaign/list",
+              label: t("campaigns"),
+              active: pathname === "/dashboard/campaign/list",
+              icon: "heroicons:list-bullet",
+              children: [],
+            },
+          ],
+        },
+      ],
+    },
   ];
 }
 export function getHorizontalMenuList(pathname: string, t: any): Group[] {
@@ -82,7 +110,34 @@ export function getHorizontalMenuList(pathname: string, t: any): Group[] {
         },
       ],
     },
-
-    
+    {
+      groupLabel: t("campaign"),
+      id: "campaign",
+      menus: [
+        {
+          id: "campaign",
+          href: "/dashboard/campaign",
+          label: t("campaign"),
+          active: pathname.includes("/dashboard/campaign"),
+          icon: "heroicons-outline:speakerphone",
+          submenus: [
+            {
+              href: "/dashboard/campaign/create",
+              label: t("create_campaign"),
+              active: pathname === "/dashboard/campaign/create",
+              icon: "heroicons:plus-circle",
+              children: [],
+            },
+            {
+              href: "/dashboard/campaign/list",
+              label: t("campaigns"),
+              active: pathname === "/dashboard/campaign/list",
+              icon: "heroicons:list-bullet",
+              children: [],
+            },
+          ],
+        },
+      ],
+    },
   ];
 }

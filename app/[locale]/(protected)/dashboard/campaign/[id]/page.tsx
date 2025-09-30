@@ -2,19 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "@/components/ui/use-toast";
 import { useTranslations } from "next-intl";
 import { useCampaignStore } from "@/context/campaignStore";
 import PageTitle from "@/components/page-title";
 import Loader from "@/components/loader";
+import { StatisticsBlock } from "@/components/blocks/statistics-block";
 
 export default function CampaignDetailPage({ params }: { params: { id: string } }) {
-  const t = useTranslations();
+  const t = useTranslations("AnalyticsDashboard");
   const router = useRouter();
   const { fetchCampaign, pauseCampaign, deleteCampaign, currentCampaign, isLoading, error } = useCampaignStore();
   const [isPauseDialogOpen, setIsPauseDialogOpen] = useState(false);
@@ -168,72 +170,81 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
           )}
         </div>
       </div>
+
+      {/* Statistics */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <StatisticsBlock
+              title={t("total_hits")}
+              total={currentCampaign.vendorStats?.totalHits || currentCampaign.total_hits_counted || 0}
+              className="bg-info/10 border-none shadow-none"
+              chartColor="#00EBFF"
+            />
+            
+            <StatisticsBlock
+              title={t("total_visits")}
+              total={currentCampaign.vendorStats?.totalVisits || currentCampaign.total_visits_counted || 0}
+              className="bg-warning/10 border-none shadow-none"
+              chartColor="#FB8F65"
+            />
+            
+            <StatisticsBlock
+              title={t("speed")}
+              total={currentCampaign.vendorStats?.speed || 0}
+              className="bg-primary/10 border-none shadow-none"
+              chartColor="#2563eb"
+            />
+          </div>
+        </CardContent>
+      </Card>
       
       {/* Campaign Overview */}
-      <Card className="p-6">
+      <Card className="p-6 border-l-4 border-l-primary/20">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-semibold">Campaign Overview</h3>
+          <div>
+            <h3 className="text-lg font-semibold">Campaign Overview</h3>
+            <p className="text-sm text-gray-500 mt-1">General information about this campaign</p>
+          </div>
           <Badge className={getStatusColor(currentCampaign.state)}>
             {currentCampaign.state.toUpperCase()}
           </Badge>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-gray-500">Campaign ID</p>
-            <p className="font-mono text-sm mt-1 break-all">{currentCampaign._id}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-1">
+            <p className="text-xs text-gray-500 uppercase tracking-wider">Campaign ID</p>
+            <p className="font-mono text-sm bg-gray-50 p-2 rounded break-all">{currentCampaign._id}</p>
           </div>
           
-          <div>
-            <p className="text-sm text-gray-500">Project ID</p>
-            <p className="font-mono text-sm mt-1">{currentCampaign.spark_traffic_project_id || "N/A"}</p>
+          <div className="space-y-1">
+            <p className="text-xs text-gray-500 uppercase tracking-wider">Project ID</p>
+            <p className="font-mono text-sm bg-gray-50 p-2 rounded">{currentCampaign.spark_traffic_project_id || "N/A"}</p>
           </div>
           
-          <div>
-            <p className="text-sm text-gray-500">Created</p>
-            <p className="text-sm mt-1">{formatDate(currentCampaign.createdAt)}</p>
+          <div className="space-y-1">
+            <p className="text-xs text-gray-500 uppercase tracking-wider">Created</p>
+            <p className="text-sm bg-gray-50 p-2 rounded">{formatDate(currentCampaign.createdAt)}</p>
           </div>
           
-          <div>
-            <p className="text-sm text-gray-500">Last Updated</p>
-            <p className="text-sm mt-1">{formatDate(currentCampaign.updatedAt)}</p>
+          <div className="space-y-1">
+            <p className="text-xs text-gray-500 uppercase tracking-wider">Last Updated</p>
+            <p className="text-sm bg-gray-50 p-2 rounded">{formatDate(currentCampaign.updatedAt)}</p>
           </div>
 
           {currentCampaign.last_stats_check && (
-            <div>
-              <p className="text-sm text-gray-500">Last Stats Check</p>
-              <p className="text-sm mt-1">{formatDate(currentCampaign.last_stats_check)}</p>
+            <div className="space-y-1">
+              <p className="text-xs text-gray-500 uppercase tracking-wider">Last Stats Check</p>
+              <p className="text-sm bg-gray-50 p-2 rounded">{formatDate(currentCampaign.last_stats_check)}</p>
             </div>
           )}
           
           {currentCampaign.is_archived && currentCampaign.archived_at && (
-            <div>
-              <p className="text-sm text-gray-500">Archived At</p>
-              <p className="text-sm mt-1">{formatDate(currentCampaign.archived_at)}</p>
+            <div className="space-y-1">
+              <p className="text-xs text-gray-500 uppercase tracking-wider">Archived At</p>
+              <p className="text-sm bg-gray-50 p-2 rounded">{formatDate(currentCampaign.archived_at)}</p>
             </div>
           )}
-        </div>
-      </Card>
-
-      {/* Statistics */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Statistics</h3>
-        
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-500 mb-1">Total Hits</p>
-            <p className="text-2xl font-semibold">{currentCampaign.vendorStats?.totalHits || currentCampaign.total_hits_counted || 0}</p>
-          </div>
-          
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-500 mb-1">Total Visits</p>
-            <p className="text-2xl font-semibold">{currentCampaign.vendorStats?.totalVisits || currentCampaign.total_visits_counted || 0}</p>
-          </div>
-          
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-500 mb-1">Speed</p>
-            <p className="text-2xl font-semibold">{currentCampaign.vendorStats?.speed || 0}</p>
-          </div>
         </div>
       </Card>
       
@@ -301,31 +312,38 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Settings</h3>
           
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center justify-between py-2">
               <span className="text-sm text-gray-500">Adult Content</span>
-              <span className="text-sm font-medium">{currentCampaign.is_adult ? "Yes" : "No"}</span>
+              <Switch checked={currentCampaign.is_adult} disabled />
             </div>
             
             <Separator />
             
             <div className="flex items-center justify-between py-2">
               <span className="text-sm text-gray-500">Coin Mining</span>
-              <span className="text-sm font-medium">{currentCampaign.is_coin_mining ? "Yes" : "No"}</span>
+              <Switch checked={currentCampaign.is_coin_mining} disabled />
             </div>
             
             <Separator />
             
             <div className="flex items-center justify-between py-2">
               <span className="text-sm text-gray-500">Archived</span>
-              <span className="text-sm font-medium">{currentCampaign.is_archived ? "Yes" : "No"}</span>
+              <Switch checked={currentCampaign.is_archived} disabled />
             </div>
             
             <Separator />
             
             <div className="flex items-center justify-between py-2">
               <span className="text-sm text-gray-500">Delete Eligible</span>
-              <span className="text-sm font-medium">{currentCampaign.delete_eligible ? "Yes" : "No"}</span>
+              <Switch checked={currentCampaign.delete_eligible} disabled />
+            </div>
+
+            <Separator />
+            
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm text-gray-500">Credit Deduction</span>
+              <Switch checked={currentCampaign.credit_deduction_enabled || false} disabled />
             </div>
           </div>
         </Card>

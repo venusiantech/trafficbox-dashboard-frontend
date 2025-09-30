@@ -32,6 +32,17 @@ export type Campaign = {
   metadata?: any;
   createdAt: string;
   updatedAt: string;
+  credit_deduction_enabled?: boolean;
+  last_stats_check?: string;
+  total_hits_counted?: number;
+  total_visits_counted?: number;
+  vendorStats?: {
+    hits?: any[];
+    visits?: any[];
+    totalHits?: number;
+    totalVisits?: number;
+    speed?: number;
+  };
 };
 
 // Define campaign creation data type

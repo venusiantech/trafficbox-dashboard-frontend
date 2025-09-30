@@ -211,7 +211,7 @@ export default function CreateCampaignPage() {
       });
 
       // Redirect to campaign details page
-      router.push(`/${window.location.pathname.split('/')[1]}/dashboard/campaign/${campaign._id}`);
+      router.push(`/${window.location.pathname.split('/')[1]}/dashboard/campaign/${campaign.id}`);
     } catch (err: any) {
       toast({
         title: "Error",

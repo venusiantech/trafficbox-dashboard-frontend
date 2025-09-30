@@ -7,6 +7,7 @@ import { backendURL } from '@/config';
 // Define campaign types based on API responses
 export type Campaign = {
   _id: string;
+  id: string;
   user: string;
   title: string;
   urls: string[];
@@ -137,7 +138,7 @@ export const useCampaignStore = create<CampaignState>()(
           }
           
           set({ 
-            currentCampaign: data.campaign || (data._id ? data : null),
+            currentCampaign: data.campaign || (data.id ? data : null),
             isLoading: false 
           });
         } catch (err: any) {
@@ -165,7 +166,7 @@ export const useCampaignStore = create<CampaignState>()(
             throw new Error(data.message || "Failed to create campaign");
           }
           
-          const campaign = data.campaign || (data._id ? data : null);
+          const campaign = data.campaign || (data.id ? data : null);
           
           if (!campaign) {
             throw new Error("Failed to create campaign: No campaign data returned");
@@ -201,16 +202,16 @@ export const useCampaignStore = create<CampaignState>()(
             throw new Error(data.message || "Failed to pause campaign");
           }
           
-          const updatedCampaign = data.campaign || (data._id ? data : null);
+          const updatedCampaign = data.campaign || (data.id ? data : null);
           
           // Update campaign in list and current campaign if it's the same
           set(state => ({
             campaigns: state.campaigns.map(campaign => 
-              campaign._id === id ? 
+              campaign.id === id ? 
                 updatedCampaign || { ...campaign, state: 'paused', is_archived: true } 
                 : campaign
             ),
-            currentCampaign: state.currentCampaign?._id === id ? 
+            currentCampaign: state.currentCampaign?.id === id ? 
               updatedCampaign || { ...state.currentCampaign, state: 'paused', is_archived: true } 
               : state.currentCampaign,
             isLoading: false
@@ -236,16 +237,16 @@ export const useCampaignStore = create<CampaignState>()(
             throw new Error(data.message || "Failed to delete campaign");
           }
           
-          const updatedCampaign = data.campaign || (data._id ? data : null);
+          const updatedCampaign = data.campaign || (data.id ? data : null);
           
           // Update campaign in list and current campaign if it's the same
           set(state => ({
             campaigns: state.campaigns.map(campaign => 
-              campaign._id === id ? 
+              campaign.id === id ? 
                 updatedCampaign || { ...campaign, state: 'archived', is_archived: true } 
                 : campaign
             ),
-            currentCampaign: state.currentCampaign?._id === id ? 
+            currentCampaign: state.currentCampaign?.id === id ? 
               updatedCampaign || { ...state.currentCampaign, state: 'archived', is_archived: true } 
               : state.currentCampaign,
             isLoading: false

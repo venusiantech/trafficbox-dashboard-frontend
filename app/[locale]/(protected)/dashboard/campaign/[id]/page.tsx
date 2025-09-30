@@ -214,7 +214,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1">
             <p className="text-xs text-gray-500 uppercase tracking-wider">Campaign ID</p>
-            <p className="font-mono text-sm bg-gray-50 p-2 rounded break-all">{currentCampaign._id}</p>
+            <p className="font-mono text-sm bg-gray-50 p-2 rounded break-all">{currentCampaign.id}</p>
           </div>
           
           <div className="space-y-1">

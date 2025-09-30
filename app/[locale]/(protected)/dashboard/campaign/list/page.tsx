@@ -6,12 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { toast } from "@/components/ui/use-toast";
 import { useTranslations } from "next-intl";
 import { useCampaignStore } from "@/context/campaignStore";
 import PageTitle from "@/components/page-title";
 import Loader from "@/components/loader";
-import { Campaign } from "@/context/campaignStore";
 
 export default function CampaignsListPage() {
   const t = useTranslations();
@@ -100,7 +98,7 @@ export default function CampaignsListPage() {
             </TableHeader>
             <TableBody>
               {campaigns.map((campaign) => (
-                <TableRow key={campaign._id}>
+                <TableRow key={campaign.id}>
                   <TableCell className="font-medium">{campaign.title}</TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(campaign.state)}>
@@ -124,7 +122,7 @@ export default function CampaignsListPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleViewCampaign(campaign._id)}
+                      onClick={() => handleViewCampaign(campaign.id)}
                     >
                       View
                     </Button>

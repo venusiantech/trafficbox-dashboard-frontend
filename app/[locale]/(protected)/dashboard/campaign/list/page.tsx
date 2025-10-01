@@ -91,6 +91,9 @@ export default function CampaignsListPage() {
               <TableRow>
                 <TableHead>Title</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Total Hits</TableHead>
+                <TableHead>Total Visits</TableHead>
+                <TableHead>Speed</TableHead>
                 <TableHead>URLs</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -104,6 +107,21 @@ export default function CampaignsListPage() {
                     <Badge className={getStatusColor(campaign.state)}>
                       {campaign.state.toUpperCase()}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className="font-mono text-sm">
+                      {campaign.stats?.totalHits || campaign.vendorStats?.totalHits || campaign.total_hits_counted || 0}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className="font-mono text-sm">
+                      {campaign.stats?.totalVisits || campaign.vendorStats?.totalVisits || campaign.total_visits_counted || 0}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className="font-mono text-sm">
+                      {campaign.stats?.speed || campaign.vendorStats?.speed || 0}
+                    </span>
                   </TableCell>
                   <TableCell className="lowercase">
                     {campaign.urls && campaign.urls.length > 0 ? (

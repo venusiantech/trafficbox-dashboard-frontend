@@ -177,21 +177,21 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <StatisticsBlock
               title={t("total_hits")}
-              total={currentCampaign.vendorStats?.totalHits || currentCampaign.total_hits_counted || 0}
+              total={currentCampaign.stats?.totalHits || currentCampaign.vendorStats?.totalHits || currentCampaign.total_hits_counted || 0}
               className="bg-info/10 border-none shadow-none"
               chartColor="#00EBFF"
             />
             
             <StatisticsBlock
               title={t("total_visits")}
-              total={currentCampaign.vendorStats?.totalVisits || currentCampaign.total_visits_counted || 0}
+              total={currentCampaign.stats?.totalVisits || currentCampaign.vendorStats?.totalVisits || currentCampaign.total_visits_counted || 0}
               className="bg-warning/10 border-none shadow-none"
               chartColor="#FB8F65"
             />
             
             <StatisticsBlock
               title={t("speed")}
-              total={currentCampaign.vendorStats?.speed || 0}
+              total={currentCampaign.stats?.speed || currentCampaign.vendorStats?.speed || 0}
               className="bg-primary/10 border-none shadow-none"
               chartColor="#2563eb"
             />

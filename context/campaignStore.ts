@@ -44,6 +44,15 @@ export type Campaign = {
     totalVisits?: number;
     speed?: number;
   };
+  status?: string;
+  stats?: {
+    totalHits: number;
+    totalVisits: number;
+    speed: number;
+    status: string;
+    dailyHits: Array<{ [key: string]: number }>;
+    dailyVisits: Array<{ [key: string]: number }>;
+  };
 };
 
 // Define campaign creation data type

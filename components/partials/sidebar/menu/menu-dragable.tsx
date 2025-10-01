@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Logo from '@/components/logo';
-import SidebarHoverToggle from '@/components/partials/sidebar/sidebar-hover-toggle';
+// import SidebarHoverToggle from '@/components/partials/sidebar/sidebar-hover-toggle';
 import { Ellipsis } from "lucide-react";
 import { usePathname } from "@/components/navigation";
 
@@ -106,7 +106,7 @@ export function MenuDragAble() {
 
             <div className="flex items-center justify-between  px-4 py-4">
                 <Logo />
-                <SidebarHoverToggle />
+                {/* <SidebarHoverToggle /> */}
             </div>
 
             <ScrollArea className="[&>div>div[style]]:block!" dir={direction}>

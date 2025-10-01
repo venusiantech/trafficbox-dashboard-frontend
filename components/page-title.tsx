@@ -1,7 +1,7 @@
 
 'use client'
 import React from 'react'
-import DateRangePicker from '@/components/date-range-picker'
+// import DateRangePicker from '@/components/date-range-picker'
 import { usePathname } from '@/components/navigation'
 import { cn } from "@/lib/utils"
 
@@ -14,7 +14,7 @@ const PageTitle = ({ title, className }: { title?: string, className?: string })
             <div className="text-2xl font-medium text-default-800 capitalize">
                 {title ? title : name ? name : null}
             </div>
-            <DateRangePicker />
+            {/* <DateRangePicker /> */}
         </div>
     )
 }

@@ -20,7 +20,7 @@ import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation'
 import { getLangDir } from 'rtl-detect';
 import Logo from '@/components/logo';
-import SidebarHoverToggle from '@/components/partials/sidebar/sidebar-hover-toggle';
+// import SidebarHoverToggle from '@/components/partials/sidebar/sidebar-hover-toggle';
 import { useMenuHoverConfig } from '@/hooks/use-menu-hover';
 import { useMediaQuery } from '@/hooks/use-media-query';
 
@@ -60,7 +60,7 @@ export function MenuClassic({ }) {
             {isDesktop && (
                 <div className="flex items-center justify-between  px-4 py-4">
                     <Logo />
-                    <SidebarHoverToggle />
+                    {/* <SidebarHoverToggle /> */}
                 </div>
             )}
 

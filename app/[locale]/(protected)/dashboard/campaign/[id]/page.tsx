@@ -18,8 +18,9 @@ import { StatisticsBlock } from "@/components/blocks/statistics-block";
 export default function CampaignDetailPage({ params }: { params: { id: string } }) {
   const t = useTranslations("AnalyticsDashboard");
   const router = useRouter();
-  const { fetchCampaign, pauseCampaign, deleteCampaign, currentCampaign, isLoading, error } = useCampaignStore();
+  const { fetchCampaign, pauseCampaign, resumeCampaign, deleteCampaign, currentCampaign, isLoading, error } = useCampaignStore();
   const [isPauseDialogOpen, setIsPauseDialogOpen] = useState(false);
+  const [isResumeDialogOpen, setIsResumeDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -43,6 +44,26 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       toast({
         title: "Error",
         description: err.message || "Failed to pause campaign",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle resume campaign
+  const handleResumeCampaign = async () => {
+    try {
+      await resumeCampaign(params.id);
+      
+      toast({
+        title: "Success",
+        description: "Campaign resumed successfully",
+      });
+      
+      setIsResumeDialogOpen(false);
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message || "Failed to resume campaign",
         variant: "destructive",
       });
     }
@@ -125,6 +146,28 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
         <PageTitle title={currentCampaign.title} />
         
         <div className="flex space-x-2">
+          {currentCampaign.state === 'paused' && (
+            <AlertDialog open={isResumeDialogOpen} onOpenChange={setIsResumeDialogOpen}>
+              <AlertDialogTrigger asChild>
+                <Button variant="default">Resume Campaign</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Resume Campaign</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to resume this campaign? It will start running again.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleResumeCampaign}>
+                    Resume
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          
           {currentCampaign.state !== 'paused' && currentCampaign.state !== 'archived' && (
             <AlertDialog open={isPauseDialogOpen} onOpenChange={setIsPauseDialogOpen}>
               <AlertDialogTrigger asChild>
@@ -150,7 +193,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
           {currentCampaign.state !== 'archived' && (
             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
               <AlertDialogTrigger asChild>
-                <Button variant="default">Delete Campaign</Button>
+                <Button variant="default" className="bg-red-600 hover:bg-red-700">Delete Campaign</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -214,12 +257,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1">
             <p className="text-xs text-gray-500 uppercase tracking-wider">Campaign ID</p>
-            <p className="font-mono text-sm bg-gray-50 p-2 rounded break-all">{currentCampaign.id}</p>
-          </div>
-          
-          <div className="space-y-1">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Project ID</p>
-            <p className="font-mono text-sm bg-gray-50 p-2 rounded">{currentCampaign.spark_traffic_project_id || "N/A"}</p>
+            <p className="font-mono text-sm bg-gray-50 p-2 rounded break-all">{currentCampaign.id || currentCampaign._id}</p>
           </div>
           
           <div className="space-y-1">

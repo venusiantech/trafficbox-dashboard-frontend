@@ -86,15 +86,19 @@ export type CampaignCreateData = {
 // Define campaign store type
 interface CampaignState {
   campaigns: Campaign[];
+  archivedCampaigns: Campaign[];
   currentCampaign: Campaign | null;
   isLoading: boolean;
+  isArchivedLoading: boolean;
   error: string | null;
   
   // Actions
   fetchCampaigns: () => Promise<void>;
+  fetchArchivedCampaigns: () => Promise<void>;
   fetchCampaign: (id: string) => Promise<void>;
   createCampaign: (campaignData: CampaignCreateData) => Promise<Campaign>;
   pauseCampaign: (id: string) => Promise<void>;
+  resumeCampaign: (id: string) => Promise<void>;
   deleteCampaign: (id: string) => Promise<void>;
   clearError: () => void;
 }
@@ -103,8 +107,10 @@ export const useCampaignStore = create<CampaignState>()(
   persist(
     (set, get) => ({
       campaigns: [],
+      archivedCampaigns: [],
       currentCampaign: null,
       isLoading: false,
+      isArchivedLoading: false,
       error: null,
 
       // Fetch all campaigns
@@ -128,6 +134,30 @@ export const useCampaignStore = create<CampaignState>()(
           });
         } catch (err: any) {
           set({ error: err.message || "Failed to fetch campaigns", isLoading: false });
+        }
+      },
+
+      // Fetch archived campaigns
+      fetchArchivedCampaigns: async () => {
+        set({ isArchivedLoading: true, error: null });
+        
+        try {
+          const response = await fetch('/api/campaigns/archived', {
+            credentials: 'include',
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.message || "Failed to fetch archived campaigns");
+          }
+          
+          set({ 
+            archivedCampaigns: data.campaigns || [],
+            isArchivedLoading: false 
+          });
+        } catch (err: any) {
+          set({ error: err.message || "Failed to fetch archived campaigns", isArchivedLoading: false });
         }
       },
 
@@ -227,6 +257,40 @@ export const useCampaignStore = create<CampaignState>()(
           }));
         } catch (err: any) {
           set({ error: err.message || "Failed to pause campaign", isLoading: false });
+        }
+      },
+
+      // Resume campaign
+      resumeCampaign: async (id: string) => {
+        set({ isLoading: true, error: null });
+        
+        try {
+          const response = await fetch(`/api/campaigns/${id}/resume`, {
+            method: "POST",
+            credentials: 'include',
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.message || "Failed to resume campaign");
+          }
+          
+          const updatedCampaign = data.campaign || (data.id ? data : null);
+          
+          set((state) => ({
+            campaigns: state.campaigns.map(campaign => 
+              campaign.id === id ? 
+                updatedCampaign || { ...campaign, state: 'active' } 
+                : campaign
+            ),
+            currentCampaign: state.currentCampaign?.id === id ? 
+              updatedCampaign || { ...state.currentCampaign, state: 'active' } 
+              : state.currentCampaign,
+            isLoading: false
+          }));
+        } catch (err: any) {
+          set({ error: err.message || "Failed to resume campaign", isLoading: false });
         }
       },
 

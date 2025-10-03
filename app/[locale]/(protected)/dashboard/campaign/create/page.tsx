@@ -212,9 +212,9 @@ export default function CreateCampaignPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div>
       <div className="max-w-4xl mx-auto p-6">
-        <div className="mb-8">
+        <div className="mb-4">
           <PageTitle title={t("Menu.create_campaign")} />
         </div>
 

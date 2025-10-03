@@ -75,7 +75,7 @@ export type CampaignCreateData = {
   desktop_rate: number;
   auto_renew: string;
   geo_type: string;
-  geo: { codes: string[] };
+  geo: Array<{ country: string; percent: number }>;
   shortener: string;
   rss_feed: string;
   ga_id: string;

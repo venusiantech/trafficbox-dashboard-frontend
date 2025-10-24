@@ -14,6 +14,7 @@ import { useCampaignStore } from "@/context/campaignStore";
 import PageTitle from "@/components/page-title";
 import Loader from "@/components/loader";
 import { StatisticsBlock } from "@/components/blocks/statistics-block";
+import { Pencil } from "lucide-react";
 
 export default function CampaignDetailPage({ params }: { params: { id: string } }) {
   const t = useTranslations("AnalyticsDashboard");
@@ -92,6 +93,11 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
     }
   };
 
+  // Handle edit campaign
+  const handleEditCampaign = () => {
+    router.push(`/${window.location.pathname.split('/')[1]}/dashboard/campaign/${params.id}/edit`);
+  };
+
   // Format date
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
@@ -146,6 +152,14 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
         <PageTitle title={currentCampaign.title} />
         
         <div className="flex space-x-2">
+          {/* Edit Campaign Button */}
+          {currentCampaign.state !== 'archived' && (
+            <Button variant="outline" onClick={handleEditCampaign}>
+              <Pencil className="w-4 h-4 mr-2" />
+              Edit Campaign
+            </Button>
+          )}
+          
           {currentCampaign.state === 'paused' && (
             <AlertDialog open={isResumeDialogOpen} onOpenChange={setIsResumeDialogOpen}>
               <AlertDialogTrigger asChild>

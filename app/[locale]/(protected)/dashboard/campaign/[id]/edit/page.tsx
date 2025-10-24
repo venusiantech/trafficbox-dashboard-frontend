@@ -227,27 +227,39 @@ export default function EditCampaignPage({ params }: { params: { id: string } })
     setIsSaving(true);
     
     try {
-      // Prepare modify data
-      const modifyData: CampaignModifyData = {
+      // Build modify API request body according to spec
+      const reqBody: any = {
+        url: formData.urls[0] || "",
         title: formData.title,
-        speed: formData.speed,
+        urls: formData.urls,
         keywords: formData.keywords,
+        referrers: {
+          mode: "basic",
+          urls: [] // You can connect to real field if you add in form
+        },
+        languages: "en", // Extend form to configure if needed
+        bounce_rate: formData.bounce_rate,
+        return_rate: 10, // Not present in form: use 10 as placeholder
+        click_outbound_events: 5, // Not present in form: use 5 as placeholder
+        form_submit_events: 2, // Not present in form: use 2 as placeholder
+        scroll_events: 3, // Not present in form: use 3 as placeholder
         time_on_page: formData.time_on_page,
         desktop_rate: formData.desktop_rate,
-        bounce_rate: formData.bounce_rate,
+        auto_renew: "true", // Not present in form: use "true" as placeholder
+        geo_type: formData.geo_type,
+        shortener: "",
+        rss_feed: "",
+        ga_id: "",
+        size: "standard",
+        speed: formData.speed,
       };
-
-      // Add urls if provided
-      if (formData.urls.length > 0 && formData.urls[0]) {
-        modifyData.urls = formData.urls;
-      }
-
-      // Add countries if in country mode
       if (formData.geo_type === "countries" && formData.countries.length > 0) {
-        modifyData.countries = formData.countries;
+        reqBody.geo = formData.countries.map(c => ({
+          country: c.country,
+          percent: c.percent
+        }));
       }
-
-      await modifyCampaign(params.id, modifyData);
+      await modifyCampaign(params.id, reqBody);
       toast.success("Campaign updated successfully!");
       router.push(`/dashboard/campaign/${params.id}`);
     } catch (error: any) {

@@ -20,8 +20,8 @@ export async function GET(
       );
     }
 
-    // Forward request to backend API
-    const response = await fetch(`${backendURL}/campaigns/${id}`, {
+    // Forward request to backend API (Alpha endpoint)
+    const response = await fetch(`${backendURL}/alpha/campaigns/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -59,8 +59,8 @@ export async function DELETE(
       );
     }
 
-    // Forward request to backend API
-    const response = await fetch(`${backendURL}/campaigns/${id}`, {
+    // Forward request to backend API (Alpha endpoint)
+    const response = await fetch(`${backendURL}/alpha/campaigns/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,

@@ -290,20 +290,32 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       <Card className="p-6">
         <h3 className="text-lg font-semibold mb-4">Target URLs</h3>
         
-        <div className="space-y-2">
-          {currentCampaign.urls.map((url, index) => (
-            <div key={index} className="p-3 bg-gray-50 rounded-lg">
-              <a 
-                href={url.startsWith('http') ? url : `https://${url}`} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-blue-600 hover:underline text-sm break-all"
-              >
-                {url}
-              </a>
+        {(() => {
+          const urlValues = currentCampaign.urls ? Object.values(currentCampaign.urls) : [];
+          if (urlValues.length === 0) {
+            return (
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-500 text-sm">No URLs specified</span>
+              </div>
+            );
+          }
+          return (
+            <div className="space-y-2">
+              {urlValues.map((url, index) => (
+                <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                  <a 
+                    href={url.startsWith('http') ? url : `https://${url}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-blue-600 hover:underline text-sm break-all"
+                  >
+                    {url}
+                  </a>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          );
+        })()}
       </Card>
       
       {/* Campaign Configuration */}
@@ -325,11 +337,28 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
             
             <div>
               <p className="text-sm text-gray-500 mb-2">Countries</p>
-              <p className="text-sm">
-                {currentCampaign.countries && currentCampaign.countries.length > 0
-                  ? currentCampaign.countries.join(", ")
-                  : "All Countries"}
-              </p>
+              <div className="text-sm">
+                {currentCampaign.countries && currentCampaign.countries.length > 0 ? (
+                  <div className="space-y-1">
+                    {currentCampaign.countries.map((country, idx) => {
+                      // Handle both old format (string) and new format (object)
+                      if (typeof country === 'string') {
+                        return <span key={idx} className="inline-block mr-2">{country}</span>;
+                      } else {
+                        return (
+                          <div key={idx} className="flex items-center gap-2">
+                            <span className="font-medium">{country.country}</span>
+                            <span className="text-gray-400">-</span>
+                            <span className="text-gray-600">{(country.percent * 100).toFixed(0)}%</span>
+                          </div>
+                        );
+                      }
+                    })}
+                  </div>
+                ) : (
+                  <span>All Countries</span>
+                )}
+              </div>
             </div>
             
             <div>

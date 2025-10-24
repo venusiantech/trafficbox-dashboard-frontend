@@ -5,194 +5,385 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslations } from "next-intl";
 import { useCampaignStore } from "@/context/campaignStore";
 import PageTitle from "@/components/page-title";
 import Loader from "@/components/loader";
+import { toast } from "sonner";
+import { Play, Clock } from "lucide-react";
+
+// Dummy data generator for charts
+const generateDummyChartData = () => {
+  const points = 20;
+  return Array.from({ length: points }, (_, i) => ({
+    x: i,
+    y: Math.floor(Math.random() * 100) + 20
+  }));
+};
+
+// Simple SVG Area Chart Component
+const MiniAreaChart = ({ data, color = "#60a5fa" }: { data: any[], color?: string }) => {
+  const width = 280;
+  const height = 40;
+  const padding = 5;
+  
+  const maxY = Math.max(...data.map(d => d.y));
+  const minY = Math.min(...data.map(d => d.y));
+  const rangeY = maxY - minY || 1;
+  
+  const points = data.map((point, i) => {
+    const x = padding + (i / (data.length - 1)) * (width - 2 * padding);
+    const y = height - padding - ((point.y - minY) / rangeY) * (height - 2 * padding);
+    return `${x},${y}`;
+  }).join(' ');
+  
+  const areaPoints = `${padding},${height} ${points} ${width - padding},${height}`;
+  
+  return (
+    <svg width={width} height={height} className="w-full h-10">
+      <defs>
+        <linearGradient id={`gradient-${color}`} x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.5" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.1" />
+        </linearGradient>
+      </defs>
+      <polygon 
+        points={areaPoints} 
+        fill={`url(#gradient-${color})`}
+        stroke="none"
+      />
+      <polyline
+        points={points}
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+      />
+    </svg>
+  );
+};
+
 
 export default function CampaignsListPage() {
   const t = useTranslations();
   const router = useRouter();
-  const { fetchCampaigns, fetchArchivedCampaigns, campaigns, archivedCampaigns, isLoading, isArchivedLoading, error } = useCampaignStore();
+  const { 
+    fetchCampaigns, 
+    fetchArchivedCampaigns, 
+    campaigns, 
+    archivedCampaigns, 
+    isLoading, 
+    isArchivedLoading, 
+    error,
+    pauseCampaign,
+    resumeCampaign,
+    deleteCampaign,
+    restoreCampaign
+  } = useCampaignStore();
   const [activeTab, setActiveTab] = useState("active");
+  const [processingCampaignId, setProcessingCampaignId] = useState<string | null>(null);
+  const [chartData, setChartData] = useState<Record<string, any[]>>({});
 
   useEffect(() => {
     fetchCampaigns();
+    
+    // Generate dummy chart data for each campaign
+    const dummyData: Record<string, any[]> = {};
+    campaigns.forEach(campaign => {
+      dummyData[campaign.id] = generateDummyChartData();
+    });
+    setChartData(dummyData);
   }, [fetchCampaigns]);
 
-  // Format date
+  // Update chart data when campaigns change
+  useEffect(() => {
+    const dummyData: Record<string, any[]> = {};
+    campaigns.forEach(campaign => {
+      if (!chartData[campaign.id]) {
+        dummyData[campaign.id] = generateDummyChartData();
+      } else {
+        dummyData[campaign.id] = chartData[campaign.id];
+      }
+    });
+    setChartData(dummyData);
+  }, [campaigns]);
+
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   };
 
-  // Determine campaign status color
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'active':
-      case 'created':
-        return 'bg-green-100 text-green-800';
-      case 'paused':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'archived':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  // Handle view campaign details
   const handleViewCampaign = (id: string) => {
     router.push(`/${window.location.pathname.split('/')[1]}/dashboard/campaign/${id}`);
   };
 
-  // Create new campaign
   const handleCreateCampaign = () => {
     router.push(`/${window.location.pathname.split('/')[1]}/dashboard/campaign/create`);
   };
 
-  // Handle tab change
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    if (value === "archived" && archivedCampaigns.length === 0) {
+  const handleResumeCampaign = async (id: string) => {
+    setProcessingCampaignId(id);
+    try {
+      await resumeCampaign(id);
+      toast.success("Campaign resumed successfully");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to resume campaign");
+    } finally {
+      setProcessingCampaignId(null);
+    }
+  };
+
+  const handlePauseCampaign = async (id: string) => {
+    setProcessingCampaignId(id);
+    try {
+      await pauseCampaign(id);
+      toast.success("Campaign paused successfully");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to pause campaign");
+    } finally {
+      setProcessingCampaignId(null);
+    }
+  };
+
+  const handleArchiveCampaign = async (id: string) => {
+    setProcessingCampaignId(id);
+    try {
+      await deleteCampaign(id);
+      toast.success("Campaign archived successfully");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to archive campaign");
+    } finally {
+      setProcessingCampaignId(null);
+    }
+  };
+
+  const handleRestoreCampaign = async (id: string) => {
+    setProcessingCampaignId(id);
+    try {
+      await restoreCampaign(id);
+      toast.success("Campaign restored successfully");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to restore campaign");
+    } finally {
+      setProcessingCampaignId(null);
+    }
+  };
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    if (tab === "archived" && archivedCampaigns.length === 0) {
       fetchArchivedCampaigns();
     }
   };
 
-  // Campaign table component
-  const CampaignTable = ({ campaigns, showActions = true }: { campaigns: any[], showActions?: boolean }) => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Title</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Total Hits</TableHead>
-          <TableHead>Total Visits</TableHead>
-          <TableHead>Speed</TableHead>
-          <TableHead>URLs</TableHead>
-          <TableHead>Created</TableHead>
-          {showActions && <TableHead className="text-right">Actions</TableHead>}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {campaigns.map((campaign) => (
-          <TableRow key={campaign.id}>
-            <TableCell className="font-medium">{campaign.title}</TableCell>
-            <TableCell>
-              <Badge className={getStatusColor(campaign.state)}>
-                {campaign.state.toUpperCase()}
-              </Badge>
-            </TableCell>
-            <TableCell className="text-center">
-              <span className="font-mono text-sm">
-                {campaign.stats?.totalHits || campaign.vendorStats?.totalHits || campaign.total_hits_counted || 0}
-              </span>
-            </TableCell>
-            <TableCell className="text-center">
-              <span className="font-mono text-sm">
-                {campaign.stats?.totalVisits || campaign.vendorStats?.totalVisits || campaign.total_visits_counted || 0}
-              </span>
-            </TableCell>
-            <TableCell className="text-center">
-              <span className="font-mono text-sm">
-                {campaign.stats?.speed || campaign.vendorStats?.speed || 0}
-              </span>
-            </TableCell>
-            <TableCell className="lowercase">
-              {campaign.urls && campaign.urls.length > 0 ? (
-                <span title={campaign.urls.join(", ")}>
-                  {campaign.urls[0].length > 30
-                    ? campaign.urls[0].substring(0, 30) + "..."
-                    : campaign.urls[0]}
-                  {campaign.urls.length > 1 && ` (+${campaign.urls.length - 1} more)`}
-                </span>
-              ) : (
-                "N/A"
-              )}
-            </TableCell>
-            <TableCell>{formatDate(campaign.createdAt)}</TableCell>
-            {showActions && (
-              <TableCell className="text-right">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleViewCampaign(campaign.id)}
-                >
-                  View
-                </Button>
-              </TableCell>
-            )}
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
+  const CampaignCard = ({ campaign, isArchived = false }: { campaign: any, isArchived?: boolean }) => {
+    const isPaused = campaign.state === 'paused';
+    const isActive = campaign.state === 'active' || campaign.state === 'created';
+    const urlValues: string[] = campaign.urls ? Object.values(campaign.urls) : [];
+    const displayUrl = urlValues.length > 0 ? urlValues[0] : 'N/A';
+    const totalHits = campaign.stats?.totalHits || campaign.vendorStats?.totalHits || 0;
+    const totalVisits = campaign.stats?.totalVisits || campaign.vendorStats?.totalVisits || 0;
+    const formattedHits = totalHits >= 1000 ? `${(totalHits / 1000).toFixed(0)}K` : totalHits;
+    const formattedVisits = totalVisits >= 1000 ? `${(totalVisits / 1000).toFixed(0)}K` : totalVisits;
+    const hitsDelta = totalHits > 0 ? `+${Math.floor(totalHits * 0.15)}` : '+0';
 
-  if (isLoading && campaigns.length === 0) {
-    return <Loader />;
-  }
-
-  if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full">
-        <h2 className="text-2xl font-semibold text-red-600">Error</h2>
-        <p className="text-gray-600">{error}</p>
-        <Button onClick={() => fetchCampaigns()} className="mt-4">
-          Retry
-        </Button>
+      <Card className="overflow-hidden">
+        {/* Pause Banner */}
+        {isPaused && (
+          <div className="bg-red-600 text-white px-4 py-2 flex items-center justify-between">
+            <span className="text-sm font-semibold">Project paused</span>
+            <Button
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white h-7 text-xs"
+              onClick={() => handleResumeCampaign(campaign.id)}
+              disabled={processingCampaignId === campaign.id}
+            >
+              <Play className="w-3 h-3 mr-1" />
+              Resume
+            </Button>
+          </div>
+        )}
+
+        <div className="p-4">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex-1">
+              <div className="text-[10px] text-gray-400 mb-1">
+                {campaign.id.toUpperCase()} • Created {formatDate(campaign.createdAt)}
+              </div>
+              <h3 
+                className="text-lg font-bold text-blue-600 hover:underline cursor-pointer mb-1"
+                onClick={() => handleViewCampaign(campaign.id)}
+              >
+                {campaign.title}
+              </h3>
+              <p className="text-xs text-gray-600">{displayUrl}</p>
+              {campaign.spark_traffic_data?.referrer === 'google' && (
+                <div className="flex items-center gap-1 mt-0.5">
+                  <svg className="w-3 h-3" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  <span className="text-[10px] text-gray-600">Google Search</span>
+                </div>
+              )}
+            </div>
+
+            {/* Stats Section - Hits & Visits */}
+            <div className="flex items-center gap-6">
+              <div className="text-right">
+                <div className="text-[10px] text-gray-500 mb-0.5">Hits</div>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xl font-bold">{formattedHits}</span>
+                  <span className="text-[10px] text-green-600 font-semibold">{hitsDelta}</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] text-gray-500 mb-0.5">Visits</div>
+                <span className="text-xl font-bold">{formattedVisits}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Settings Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleViewCampaign(campaign.id)}
+            className="mb-2 h-7 text-xs px-3 font-medium"
+          >
+            Settings
+          </Button>
+
+          {/* Chart and Status Section */}
+          <div className="flex items-center gap-4">
+            {/* Realtime Indicator */}
+            <div className="flex items-center gap-1.5">
+              <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-blue-500 animate-pulse' : 'bg-gray-400'}`}></div>
+              <span className="text-xs text-gray-600 font-medium">Realtime</span>
+              {isActive && (
+                <Badge className="text-[10px] px-1.5 py-0.5 bg-green-50 text-green-700 border-green-300">
+                  ACTIVE
+                </Badge>
+              )}
+            </div>
+
+            {/* Chart */}
+            <div className="flex-1">
+              <div className="mb-1">
+                <MiniAreaChart data={chartData[campaign.id] || []} />
+              </div>
+              <div className="flex justify-between text-[10px] text-gray-400">
+                <span>24 Sep</span>
+                <span>24 Oct</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Time Stats */}
+          <div className="flex items-center justify-center mt-2 pt-2 border-t border-gray-100">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-gray-400" />
+              <div className="flex gap-4 text-xs">
+                <div className="flex items-center gap-1">
+                  <span className="text-gray-500">Min</span>
+                  <span className="font-semibold text-gray-900">16 min</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-gray-500">Max</span>
+                  <span className="font-semibold text-gray-900">1 min</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader />
       </div>
     );
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  const displayCampaigns = activeTab === "active" ? campaigns : archivedCampaigns;
+  const displayLoading = activeTab === "active" ? isLoading : isArchivedLoading;
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <PageTitle title={t("Menu.campaigns")} />
-        
+    <div className="space-y-3">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <PageTitle title="Campaigns" />
         <Button onClick={handleCreateCampaign}>
           Create Campaign
         </Button>
       </div>
-      
-      <Tabs defaultValue="active" onValueChange={handleTabChange}>
-        <TabsList className="flex w-full">
-          <TabsTrigger value="active">Active Campaigns</TabsTrigger>
-          <TabsTrigger value="archived">Archived Campaigns</TabsTrigger>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList>
+          <TabsTrigger value="active">
+            Active Campaigns ({campaigns.length})
+          </TabsTrigger>
+          <TabsTrigger value="archived">
+            Archived ({archivedCampaigns.length})
+          </TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="active">
-          <Card>
-            {campaigns.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8">
-                <h2 className="text-xl font-semibold">No campaigns found</h2>
-                <p className="text-gray-600 mb-4">You haven't created any campaigns yet.</p>
-                <Button onClick={handleCreateCampaign}>
-                  Create Your First Campaign
-                </Button>
-              </div>
-            ) : (
-              <CampaignTable campaigns={campaigns} />
-            )}
-          </Card>
+
+        <TabsContent value="active" className="mt-3">
+          {displayLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <Loader />
+            </div>
+          ) : displayCampaigns.length === 0 ? (
+            <Card className="p-12 text-center">
+              <p className="text-gray-500 mb-4">No campaigns found</p>
+              <Button onClick={handleCreateCampaign}>
+                Create Your First Campaign
+              </Button>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {displayCampaigns.map((campaign) => (
+                <CampaignCard key={campaign.id} campaign={campaign} />
+              ))}
+            </div>
+          )}
         </TabsContent>
-        
-        <TabsContent value="archived">
-          <Card>
-            {isArchivedLoading ? (
-              <div className="flex flex-col items-center justify-center p-8">
-                <Loader />
-                <p className="text-gray-600 mt-4">Loading archived campaigns...</p>
-              </div>
-            ) : archivedCampaigns.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8">
-                <h2 className="text-xl font-semibold">No archived campaigns found</h2>
-                <p className="text-gray-600 mb-4">You don't have any archived campaigns.</p>
-              </div>
-            ) : (
-              <CampaignTable campaigns={archivedCampaigns} showActions={false} />
-            )}
-          </Card>
+
+        <TabsContent value="archived" className="mt-3">
+          {displayLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <Loader />
+            </div>
+          ) : displayCampaigns.length === 0 ? (
+            <Card className="p-12 text-center">
+              <p className="text-gray-500">No archived campaigns</p>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {displayCampaigns.map((campaign) => (
+                <CampaignCard key={campaign.id} campaign={campaign} isArchived />
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

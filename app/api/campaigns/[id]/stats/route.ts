@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { backendURL } from "@/config";
 
-// POST /api/campaigns/[id]/pause - Pause a campaign
-export async function POST(
+// GET /api/campaigns/[id]/stats - Get campaign statistics
+export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -20,9 +20,18 @@ export async function POST(
       );
     }
 
-    // Forward request to backend API (Alpha endpoint)
-    const response = await fetch(`${backendURL}/alpha/campaigns/${id}/pause`, {
-      method: "POST",
+    // Get query parameters
+    const { searchParams } = new URL(request.url);
+    const from = searchParams.get("from");
+    const to = searchParams.get("to");
+
+    // Build URL with query params (Alpha endpoint)
+    const url = new URL(`${backendURL}/alpha/campaigns/${id}/stats`);
+    if (from) url.searchParams.append("from", from);
+    if (to) url.searchParams.append("to", to);
+
+    // Forward request to backend API
+    const response = await fetch(url.toString(), {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -34,10 +43,11 @@ export async function POST(
     // Return response from backend
     return NextResponse.json(data, { status: response.status });
   } catch (error: any) {
-    console.error(`Error pausing campaign ${params.id}:`, error);
+    console.error(`Error fetching campaign stats ${params.id}:`, error);
     return NextResponse.json(
-      { error: "Failed to pause campaign" },
+      { error: "Failed to fetch campaign statistics" },
       { status: 500 }
     );
   }
 }
+

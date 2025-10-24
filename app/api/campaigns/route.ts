@@ -15,8 +15,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Forward request to backend API
-    const response = await fetch(`${backendURL}/campaigns`, {
+    // Forward request to backend API (Alpha endpoint)
+    const response = await fetch(`${backendURL}/alpha/campaigns`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -52,8 +52,8 @@ export async function POST(request: NextRequest) {
     // Get request body
     const body = await request.json();
 
-    // Forward request to backend API
-    const response = await fetch(`${backendURL}/campaigns`, {
+    // Forward request to backend API (Alpha endpoint)
+    const response = await fetch(`${backendURL}/alpha/campaigns`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

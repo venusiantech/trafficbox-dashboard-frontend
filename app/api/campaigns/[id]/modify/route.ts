@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { backendURL } from "@/config";
 
-// POST /api/campaigns/[id]/pause - Pause a campaign
+// POST /api/campaigns/[id]/modify - Modify a campaign
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -20,13 +20,17 @@ export async function POST(
       );
     }
 
+    // Get request body
+    const body = await request.json();
+
     // Forward request to backend API (Alpha endpoint)
-    const response = await fetch(`${backendURL}/alpha/campaigns/${id}/pause`, {
+    const response = await fetch(`${backendURL}/alpha/campaigns/${id}/modify`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
+      body: JSON.stringify(body),
     });
 
     const data = await response.json();
@@ -34,10 +38,11 @@ export async function POST(
     // Return response from backend
     return NextResponse.json(data, { status: response.status });
   } catch (error: any) {
-    console.error(`Error pausing campaign ${params.id}:`, error);
+    console.error(`Error modifying campaign ${params.id}:`, error);
     return NextResponse.json(
-      { error: "Failed to pause campaign" },
+      { error: "Failed to modify campaign" },
       { status: 500 }
     );
   }
 }
+

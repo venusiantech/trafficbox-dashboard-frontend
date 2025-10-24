@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const response = await fetch(`${backendURL}/campaigns/archived`, {
+    const response = await fetch(`${backendURL}/alpha/campaigns/archived`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

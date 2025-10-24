@@ -2,14 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { backendURL } from "@/config";
 
-// POST /api/campaigns/[id]/pause - Pause a campaign
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// GET /api/campaigns/user/stats - Get user campaign statistics
+export async function GET(request: NextRequest) {
   try {
-    const { id } = params;
-
     // Get auth token from cookies
     const token = cookies().get("token")?.value;
 
@@ -20,9 +15,9 @@ export async function POST(
       );
     }
 
-    // Forward request to backend API (Alpha endpoint)
-    const response = await fetch(`${backendURL}/alpha/campaigns/${id}/pause`, {
-      method: "POST",
+    // Forward request to backend API (Note: This endpoint may not exist in Alpha, using regular endpoint)
+    // If this endpoint doesn't exist, it will return an error
+    const response = await fetch(`${backendURL}/campaigns/user/stats`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -34,10 +29,11 @@ export async function POST(
     // Return response from backend
     return NextResponse.json(data, { status: response.status });
   } catch (error: any) {
-    console.error(`Error pausing campaign ${params.id}:`, error);
+    console.error("Error fetching user campaign stats:", error);
     return NextResponse.json(
-      { error: "Failed to pause campaign" },
+      { error: "Failed to fetch user campaign statistics" },
       { status: 500 }
     );
   }
 }
+

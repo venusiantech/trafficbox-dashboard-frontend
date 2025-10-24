@@ -12,7 +12,7 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const response = await fetch(`${backendURL}/campaigns/${params.id}/resume`, {
+    const response = await fetch(`${backendURL}/alpha/campaigns/${params.id}/resume`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

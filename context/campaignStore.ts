@@ -10,10 +10,10 @@ export type Campaign = {
   id: string;
   user: string;
   title: string;
-  urls: string[];
+  urls: Record<string, string>; // Object with keys like "urls-1", "urls-2" mapping to URL strings
   duration_min?: number;
   duration_max?: number;
-  countries?: string[];
+  countries?: Array<{ country: string; percent: number }> | string[]; // Support both formats
   rule?: string;
   capping_type?: string;
   capping_value?: number;
@@ -83,11 +83,46 @@ export type CampaignCreateData = {
   speed: number;
 };
 
+// Define campaign modify data type
+export type CampaignModifyData = {
+  title?: string;
+  speed?: number;
+  countries?: Array<{ country: string; percent: number }>;
+  traffic_type?: string;
+  keywords?: string;
+  time_on_page?: string;
+  desktop_rate?: number;
+  bounce_rate?: number;
+  urls?: string[];
+  referrers?: {
+    mode: string;
+    urls: string[];
+  };
+  languages?: string;
+  return_rate?: number;
+  click_outbound_events?: number;
+  form_submit_events?: number;
+  scroll_events?: number;
+};
+
+// Define user stats type
+export type UserCampaignStats = {
+  totalCampaigns: number;
+  activeCampaigns: number;
+  pausedCampaigns: number;
+  archivedCampaigns: number;
+  totalHits: number;
+  totalVisits: number;
+  totalCreditsUsed: number;
+  averageSpeed: number;
+};
+
 // Define campaign store type
 interface CampaignState {
   campaigns: Campaign[];
   archivedCampaigns: Campaign[];
   currentCampaign: Campaign | null;
+  userStats: UserCampaignStats | null;
   isLoading: boolean;
   isArchivedLoading: boolean;
   error: string | null;
@@ -96,10 +131,14 @@ interface CampaignState {
   fetchCampaigns: () => Promise<void>;
   fetchArchivedCampaigns: () => Promise<void>;
   fetchCampaign: (id: string) => Promise<void>;
+  fetchCampaignStats: (id: string, from?: string, to?: string) => Promise<any>;
+  fetchUserStats: () => Promise<void>;
   createCampaign: (campaignData: CampaignCreateData) => Promise<Campaign>;
+  modifyCampaign: (id: string, campaignData: CampaignModifyData) => Promise<void>;
   pauseCampaign: (id: string) => Promise<void>;
   resumeCampaign: (id: string) => Promise<void>;
   deleteCampaign: (id: string) => Promise<void>;
+  restoreCampaign: (id: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -109,6 +148,7 @@ export const useCampaignStore = create<CampaignState>()(
       campaigns: [],
       archivedCampaigns: [],
       currentCampaign: null,
+      userStats: null,
       isLoading: false,
       isArchivedLoading: false,
       error: null,
@@ -225,6 +265,88 @@ export const useCampaignStore = create<CampaignState>()(
         }
       },
 
+      // Modify campaign
+      modifyCampaign: async (id: string, campaignData: CampaignModifyData) => {
+        set({ isLoading: true, error: null });
+        
+        try {
+          const response = await fetch(`/api/campaigns/${id}/modify`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: 'include',
+            body: JSON.stringify(campaignData),
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.message || "Failed to modify campaign");
+          }
+          
+          const updatedCampaign = data.campaign || (data.id ? data : null);
+          
+          // Update campaign in list and current campaign if it's the same
+          set(state => ({
+            campaigns: state.campaigns.map(campaign => 
+              campaign.id === id ? updatedCampaign || { ...campaign, ...campaignData } : campaign
+            ),
+            currentCampaign: state.currentCampaign?.id === id ? 
+              updatedCampaign || { ...state.currentCampaign, ...campaignData } : state.currentCampaign,
+            isLoading: false
+          }));
+        } catch (err: any) {
+          set({ error: err.message || "Failed to modify campaign", isLoading: false });
+          throw err;
+        }
+      },
+
+      // Fetch campaign stats
+      fetchCampaignStats: async (id: string, from?: string, to?: string) => {
+        try {
+          const params = new URLSearchParams();
+          if (from) params.append('from', from);
+          if (to) params.append('to', to);
+          
+          const url = `/api/campaigns/${id}/stats${params.toString() ? `?${params.toString()}` : ''}`;
+          
+          const response = await fetch(url, {
+            credentials: 'include',
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.message || "Failed to fetch campaign stats");
+          }
+          
+          return data;
+        } catch (err: any) {
+          console.error("Error fetching campaign stats:", err);
+          throw err;
+        }
+      },
+
+      // Fetch user stats
+      fetchUserStats: async () => {
+        try {
+          const response = await fetch('/api/campaigns/user/stats', {
+            credentials: 'include',
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.message || "Failed to fetch user stats");
+          }
+          
+          set({ userStats: data.stats || data });
+        } catch (err: any) {
+          console.error("Error fetching user stats:", err);
+        }
+      },
+
       // Pause campaign
       pauseCampaign: async (id: string) => {
         set({ isLoading: true, error: null });
@@ -312,20 +434,50 @@ export const useCampaignStore = create<CampaignState>()(
           
           const updatedCampaign = data.campaign || (data.id ? data : null);
           
-          // Update campaign in list and current campaign if it's the same
+          // Remove from active campaigns and add to archived
           set(state => ({
-            campaigns: state.campaigns.map(campaign => 
-              campaign.id === id ? 
-                updatedCampaign || { ...campaign, state: 'archived', is_archived: true } 
-                : campaign
-            ),
-            currentCampaign: state.currentCampaign?.id === id ? 
-              updatedCampaign || { ...state.currentCampaign, state: 'archived', is_archived: true } 
-              : state.currentCampaign,
+            campaigns: state.campaigns.filter(campaign => campaign.id !== id),
+            archivedCampaigns: updatedCampaign ? 
+              [updatedCampaign, ...state.archivedCampaigns] : 
+              state.archivedCampaigns,
+            currentCampaign: state.currentCampaign?.id === id ? null : state.currentCampaign,
             isLoading: false
           }));
         } catch (err: any) {
           set({ error: err.message || "Failed to delete campaign", isLoading: false });
+          throw err;
+        }
+      },
+
+      // Restore campaign
+      restoreCampaign: async (id: string) => {
+        set({ isLoading: true, error: null });
+        
+        try {
+          const response = await fetch(`/api/campaigns/${id}/restore`, {
+            method: "POST",
+            credentials: 'include',
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.message || "Failed to restore campaign");
+          }
+          
+          const restoredCampaign = data.campaign || (data.id ? data : null);
+          
+          // Remove from archived and add to active campaigns
+          set(state => ({
+            archivedCampaigns: state.archivedCampaigns.filter(campaign => campaign.id !== id),
+            campaigns: restoredCampaign ? 
+              [restoredCampaign, ...state.campaigns] : 
+              state.campaigns,
+            isLoading: false
+          }));
+        } catch (err: any) {
+          set({ error: err.message || "Failed to restore campaign", isLoading: false });
+          throw err;
         }
       },
 

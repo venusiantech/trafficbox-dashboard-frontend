@@ -15,7 +15,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
-import { data } from "./data"
 import {
   Table,
   TableBody,
@@ -26,61 +25,68 @@ import {
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ChevronLeft, ChevronRight, TrendingDown, TrendingUp } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
-
-export type CompanyData = {
-  company: string;
-  category: string;
+export type CampaignPerformanceData = {
+  campaignId: string;
+  title: string;
+  sparkTrafficProjectId?: string;
+  hits: number;
+  visits: number;
   views: number;
-  revenue: string;
-  sales: number;
-  up: boolean;
+  uniqueVisitors: number;
+  speed: number;
+  bounceRate: number;
+  sessionDuration: number;
+  lastUpdated: string;
+  projectStatus: string;
 }
 
-export const columns: ColumnDef<CompanyData>[] = [
+const getStatusColor = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'active':
+      return 'bg-success/10 text-success';
+    case 'paused':
+      return 'bg-warning/10 text-warning';
+    case 'unknown':
+    default:
+      return 'bg-default/10 text-default-600';
+  }
+}
+
+export const columns: ColumnDef<CampaignPerformanceData>[] = [
   {
-    accessorKey: "company",
-    header: "Company",
+    accessorKey: "title",
+    header: "Campaign",
     cell: ({ row }) => (
-      <div className="flex items-center gap-5">
-        <div className="flex-none">
-          <div className="w-8 h-8">
-            <Avatar>
-              <AvatarImage src={row.getValue("company")}></AvatarImage>
-              <AvatarFallback>SC</AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
+      <div className="flex items-center gap-3">
         <div className="flex-1 text-start">
-          <h4 className="text-sm font-medium text-default-600 whitespace-nowrap mb-1">
-            Biffco Enterprises Ltd.
+          <h4 className="text-sm font-medium text-default-900 whitespace-nowrap mb-1">
+            {row.original.title}
           </h4>
-          <div className="text-xs font-normal text-default-600 ">
-            Biffco@example.com
+          <div className="text-xs font-normal text-default-600">
+            {row.original.sparkTrafficProjectId || 'N/A'}
           </div>
         </div>
       </div>
     ),
   },
   {
-    accessorKey: "category",
-    header: "Category",
+    accessorKey: "hits",
+    header: "Hits",
     cell: ({ row }) => (
-      <span className="whitespace-nowrap">{row.getValue("category")}</span>
+      <span className="whitespace-nowrap font-medium">{row.getValue("hits")}</span>
     ),
   },
   {
-    accessorKey: "sales",
-    header: "Sales",
+    accessorKey: "visits",
+    header: "Visits",
     cell: ({ row }) => (
-      <div className="flex items-center gap-4">
-        <span>{row.getValue("sales")}</span>
-        {
-          row?.original.up ?
-            <TrendingUp className="text-success w-4 h-4" />
-            :
-            <TrendingDown className="text-destructive w-4 h-4" />
-        }
+      <div className="flex items-center gap-2">
+        <span className="font-medium">{row.getValue("visits")}</span>
+        {row.original.visits > 0 && (
+          <TrendingUp className="text-success w-3 h-3" />
+        )}
       </div>
     )
   },
@@ -88,19 +94,41 @@ export const columns: ColumnDef<CompanyData>[] = [
     accessorKey: "views",
     header: "Views",
     cell: ({ row }) => (
-      <span>{row.getValue("views")}</span>
+      <span className="font-medium">{row.getValue("views")}</span>
     )
   },
   {
-    accessorKey: "revenue",
-    header: "Revenue",
+    accessorKey: "uniqueVisitors",
+    header: "Unique",
     cell: ({ row }) => (
-      <span>{row.getValue("revenue")}</span>
+      <span className="font-medium">{row.getValue("uniqueVisitors")}</span>
+    )
+  },
+  {
+    accessorKey: "bounceRate",
+    header: "Bounce Rate",
+    cell: ({ row }) => (
+      <span className="font-medium">
+        {(row.getValue("bounceRate") as number * 100).toFixed(1)}%
+      </span>
+    )
+  },
+  {
+    accessorKey: "projectStatus",
+    header: "Status",
+    cell: ({ row }) => (
+      <Badge className={getStatusColor(row.getValue("projectStatus"))}>
+        {row.getValue("projectStatus")}
+      </Badge>
     )
   }
 ]
 
-const CompanyTable = () => {
+interface CompanyTableProps {
+  data?: CampaignPerformanceData[];
+}
+
+const CompanyTable = ({ data = [] }: CompanyTableProps) => {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -132,7 +160,7 @@ const CompanyTable = () => {
   })
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full max-h-[550px] overflow-x-auto">
       <Table className="overflow-hidden">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

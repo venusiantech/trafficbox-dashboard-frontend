@@ -6,11 +6,11 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
+  // DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
+  // DropdownMenuSub,
+  // DropdownMenuSubContent,
+  // DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/ui/icon"
@@ -140,19 +140,19 @@ const ProfileInfo = () => {
               </Link>
             ))}
           </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
+          {/* <DropdownMenuSeparator /> */}
+          {/* <DropdownMenuGroup>
             <Link href="/dashboard" className="cursor-pointer">
-              {/* <DropdownMenuItem className="flex items-center gap-2 text-sm font-medium text-default-600 capitalize px-3 py-1.5 cursor-pointer">
+              <DropdownMenuItem className="flex items-center gap-2 text-sm font-medium text-default-600 capitalize px-3 py-1.5 cursor-pointer">
                 <Icon icon="heroicons:user-group" className="w-4 h-4" />
                 team
-              </DropdownMenuItem> */}
-            </Link>
-            <DropdownMenuSub>
-              {/* <DropdownMenuSubTrigger className="flex items-center gap-2 text-sm font-medium text-default-600 capitalize px-3 py-1.5 ">
+              </DropdownMenuItem>
+             </Link>
+            <DropdownMenuSub> 
+              <DropdownMenuSubTrigger className="flex items-center gap-2 text-sm font-medium text-default-600 capitalize px-3 py-1.5 ">
                 <Icon icon="heroicons:user-plus" className="w-4 h-4" />
                 Invite user
-              </DropdownMenuSubTrigger> */}
+              </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
                   {[
@@ -179,12 +179,12 @@ const ProfileInfo = () => {
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
-            {/* <Link href="/dashboard">
+            <Link href="/dashboard">
               <DropdownMenuItem className="flex items-center gap-2 text-sm font-medium text-default-600 capitalize px-3 py-1.5 cursor-pointer">
                 <Icon icon="heroicons:variable" className="w-4 h-4" />
                 Github
               </DropdownMenuItem>
-            </Link> */}
+            </Link>
 
             <DropdownMenuSub>
               <DropdownMenuSubTrigger className="flex items-center gap-2 text-sm font-medium text-default-600 capitalize px-3 py-1.5 cursor-pointer">
@@ -213,7 +213,7 @@ const ProfileInfo = () => {
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
-          </DropdownMenuGroup>
+          </DropdownMenuGroup> */}
           <DropdownMenuSeparator className="mb-0 dark:bg-background" />
           <DropdownMenuItem
             onClick={handleLogout}

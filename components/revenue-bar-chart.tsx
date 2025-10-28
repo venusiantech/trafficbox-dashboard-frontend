@@ -4,33 +4,79 @@ import { useConfig } from "@/hooks/use-config";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
+import { TimeRangeMetric } from "@/context/dashboardStore";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 interface RevenueBarChartProps {
   height?: number;
   chartType?: "bar" | "area";
   series?: any[];
-  chartColors?: string[]
+  chartColors?: string[];
+  timeRangeMetrics?: {
+    '15m': TimeRangeMetric;
+    '1h': TimeRangeMetric;
+    '7d': TimeRangeMetric;
+    '30d': TimeRangeMetric;
+  };
 }
+
 const defaultSeries = [{
-  name: "Net Profit",
-  data: [44, 55, 57, 56, 61, 58, 63, 60, 66],
+  name: "Hits",
+  data: [0, 0, 0, 0],
 },
 {
-  name: "Revenue",
-  data: [76, 85, 101, 98, 87, 105, 91, 114, 94],
+  name: "Visits",
+  data: [0, 0, 0, 0],
 },
 {
-  name: "Free Cash Flow",
-  data: [35, 41, 36, 26, 45, 48, 52, 53, 41],
+  name: "Views",
+  data: [0, 0, 0, 0],
 }]
+
 const RevenueBarChart = ({
   height = 400,
   chartType = "bar",
-  series = defaultSeries,
-  chartColors = ["#4669FA", "#0CE7FA", "#FA916B"]
+  series,
+  chartColors = ["#4669FA", "#0CE7FA", "#FA916B"],
+  timeRangeMetrics
 
 }: RevenueBarChartProps) => {
+  // Transform timeRangeMetrics into chart series
+  const chartSeries = series || (timeRangeMetrics ? [
+    {
+      name: "Hits",
+      data: [
+        timeRangeMetrics['15m']?.totalHits || 0,
+        timeRangeMetrics['1h']?.totalHits || 0,
+        timeRangeMetrics['7d']?.totalHits || 0,
+        timeRangeMetrics['30d']?.totalHits || 0,
+      ],
+    },
+    {
+      name: "Visits",
+      data: [
+        timeRangeMetrics['15m']?.totalVisits || 0,
+        timeRangeMetrics['1h']?.totalVisits || 0,
+        timeRangeMetrics['7d']?.totalVisits || 0,
+        timeRangeMetrics['30d']?.totalVisits || 0,
+      ],
+    },
+    {
+      name: "Views",
+      data: [
+        timeRangeMetrics['15m']?.totalViews || 0,
+        timeRangeMetrics['1h']?.totalViews || 0,
+        timeRangeMetrics['7d']?.totalViews || 0,
+        timeRangeMetrics['30d']?.totalViews || 0,
+      ],
+    }
+  ] : defaultSeries);
+
+  // Check if all values are zero
+  const hasData = chartSeries.some(series => 
+    series.data.some((value: number) => value > 0)
+  );
+
   const [config] = useConfig();
   const { isRtl } = config;
   const t = useTranslations("AnalyticsDashboard");
@@ -101,15 +147,10 @@ const RevenueBarChart = ({
     },
     xaxis: {
       categories: [
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
+        "15 Minutes",
+        "1 Hour",
+        "7 Days",
+        "30 Days",
       ],
       labels: {
         style: {
@@ -131,7 +172,7 @@ const RevenueBarChart = ({
     tooltip: {
       y: {
         formatter: function (val: number) {
-          return "$ " + val + " thousands";
+          return val.toLocaleString();
         },
       },
     },
@@ -160,10 +201,29 @@ const RevenueBarChart = ({
       },
     ],
   };
+  // Show message when no data is available
+  if (!hasData) {
+    return (
+      <div className="flex items-center justify-center" style={{ height: `${height}px` }}>
+        <div className="text-center">
+          <div className="text-lg font-medium text-default-900 mb-2">
+            {t("revenue_report")}
+          </div>
+          <p className="text-sm text-default-600">
+            No traffic data available yet
+          </p>
+          <p className="text-xs text-default-500 mt-1">
+            Data will appear here once your campaigns start receiving traffic
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Chart
       options={options}
-      series={series}
+      series={chartSeries}
       type={chartType}
       height={height}
       width={"100%"}

@@ -1,3 +1,5 @@
+"use client"
+
 import Image from "next/image";
 import { StatisticsBlock } from "@/components/blocks/statistics-block";
 import { BlockBadge, WelcomeBlock } from "@/components/blocks/welcome-block";
@@ -10,8 +12,35 @@ import RecentActivity from "./components/recent-activity";
 import MostSales from "./components/most-sales";
 import OverviewRadialChart from "./components/overview-radial";
 import { useTranslations } from "next-intl";
+import { useDashboardStore } from "@/context/dashboardStore";
+import { useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+
 const DashboardPage = () => {
     const t = useTranslations("AnalyticsDashboard");
+    const { overview, metadata, isLoading, error, fetchOverview } = useDashboardStore();
+
+    useEffect(() => {
+      fetchOverview();
+    }, []);
+
+    // Calculate visit to hit conversion rate
+    const conversionRate = overview?.totalHits 
+      ? Math.round((overview.totalVisits / overview.totalHits) * 100) 
+      : 0;
+
+    if (error) {
+      return (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Card className="p-6">
+            <CardContent>
+              <p className="text-destructive text-center">Error: {error}</p>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
     return (
       <div>
         <div className="grid grid-cols-12 items-center gap-5 mb-5">
@@ -39,25 +68,33 @@ const DashboardPage = () => {
           <div className="2xl:col-span-9 lg:col-span-8 col-span-12">
             <Card>
               <CardContent className="p-4">
-                <div className="grid md:grid-cols-3   gap-4">
-                  <StatisticsBlock
-                    title={t("revenue_chart_title")}
-                    total="3,564"
-                    className="bg-info/10 border-none shadow-none"
-                  />
-                  <StatisticsBlock
-                    title={t("sold_chart_title")}
-                    total="564"
-                    className="bg-warning/10 border-none shadow-none"
-                    chartColor="#FB8F65"
-                  />
-                  <StatisticsBlock
-                    title={t("growth_chart_title")}
-                    total="+5.0%"
-                    className="bg-primary/10 border-none shadow-none"
-                    chartColor="#2563eb"
-                  />
-                </div>
+                {isLoading ? (
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <Skeleton className="h-20 w-full" />
+                    <Skeleton className="h-20 w-full" />
+                    <Skeleton className="h-20 w-full" />
+                  </div>
+                ) : (
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <StatisticsBlock
+                      title="Total Campaigns"
+                      total={overview?.totalCampaigns?.toString() || "0"}
+                      className="bg-info/10 border-none shadow-none"
+                    />
+                    <StatisticsBlock
+                      title="Total Hits"
+                      total={overview?.totalHits?.toLocaleString() || "0"}
+                      className="bg-warning/10 border-none shadow-none"
+                      chartColor="#FB8F65"
+                    />
+                    <StatisticsBlock
+                      title="Total Visits"
+                      total={overview?.totalVisits?.toLocaleString() || "0"}
+                      className="bg-primary/10 border-none shadow-none"
+                      chartColor="#2563eb"
+                    />
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -66,7 +103,11 @@ const DashboardPage = () => {
           <div className="lg:col-span-8 col-span-12">
             <Card>
               <CardContent className="p-4">
-                <RevinueBarChart/>
+                {isLoading ? (
+                  <Skeleton className="h-[400px] w-full" />
+                ) : (
+                  <RevinueBarChart timeRangeMetrics={overview?.timeRangeMetrics} />
+                )}
               </CardContent>
             </Card>
           </div>
@@ -74,12 +115,24 @@ const DashboardPage = () => {
             <Card>
               <CardHeader className="flex flex-row items-center">
                 <CardTitle className="flex-1">
-                  {t("overview_circle_chart_title")}
+                  Overview Distribution
                 </CardTitle>
                 <DashboardDropdown />
               </CardHeader>
               <CardContent>
-                <OverviewChart />
+                {isLoading ? (
+                  <Skeleton className="h-[373px] w-full" />
+                ) : (
+                  <OverviewChart 
+                    series={[
+                      overview?.totalHits || 0,
+                      overview?.totalVisits || 0,
+                      overview?.totalViews || 0,
+                      overview?.uniqueVisitors || 0
+                    ]}
+                    labels={["Hits", "Visits", "Views", "Unique Visitors"]}
+                  />
+                )}
               </CardContent>
             </Card>
           </div>
@@ -87,12 +140,18 @@ const DashboardPage = () => {
             <Card>
               <CardHeader className="flex flex-row items-center">
                 <CardTitle className="flex-1">
-                  {t("company_table_title")}
+                  Campaign Performance
                 </CardTitle>
                 <DashboardDropdown />
               </CardHeader>
               <CardContent className="p-0">
-                <CompanyTable />
+                {isLoading ? (
+                  <div className="p-4">
+                    <Skeleton className="h-[400px] w-full" />
+                  </div>
+                ) : (
+                  <CompanyTable data={overview?.campaignPerformance || []} />
+                )}
               </CardContent>
             </Card>
           </div>
@@ -100,59 +159,82 @@ const DashboardPage = () => {
             <Card>
               <CardHeader className="flex flex-row items-center">
                 <CardTitle className="flex-1">
-                  {t("recent_activity_table_title")}
+                  Recent Activity
                 </CardTitle>
                 <DashboardDropdown />
               </CardHeader>
               <CardContent>
-                <RecentActivity />
+                {isLoading ? (
+                  <div className="space-y-3">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                  </div>
+                ) : (
+                  <RecentActivity activities={overview?.recentActivity || []} />
+                )}
               </CardContent>
             </Card>
           </div>
           <div className="lg:col-span-8 col-span-12">
-            <MostSales />
+            {isLoading ? (
+              <Card>
+                <CardContent className="p-4">
+                  <Skeleton className="h-[400px] w-full" />
+                </CardContent>
+              </Card>
+            ) : (
+              <MostSales topCountries={overview?.topCountries || []} />
+            )}
           </div>
           <div className="lg:col-span-4 col-span-12">
             <Card>
               <CardHeader className="flex flex-row items-center">
                 <CardTitle className="flex-1">
-                  {t("overview_circle_chart_title")}
+                  Visit Conversion Rate
                 </CardTitle>
                 <DashboardDropdown />
               </CardHeader>
               <CardContent>
-                <OverviewRadialChart />
-                <div className="bg-default-50 rounded p-4 mt-8 flex justify-between flex-wrap">
-                  <div className="space-y-1">
-                    <h4 className="text-default-600  text-xs font-normal">
-                     {t("invested_amount")}
-                    </h4>
-                    <div className="text-sm font-medium text-default-900">
-                      $8264.35
-                    </div>
-                    <div className="text-default-500  text-xs font-normal">
-                      +0.001.23 (0.2%)
-                    </div>
-                  </div>
+                {isLoading ? (
+                  <Skeleton className="h-[320px] w-full" />
+                ) : (
+                  <>
+                    <OverviewRadialChart series={[conversionRate]} />
+                    <div className="bg-default-50 rounded p-4 mt-8 flex justify-between flex-wrap gap-4">
+                      <div className="space-y-1">
+                        <h4 className="text-default-600 text-xs font-normal">
+                          Total Views
+                        </h4>
+                        <div className="text-sm font-medium text-default-900">
+                          {overview?.totalViews?.toLocaleString() || "0"}
+                        </div>
+                        <div className="text-default-500 text-xs font-normal">
+                          All campaigns
+                        </div>
+                      </div>
 
-                  <div className="space-y-1">
-                    <h4 className="text-default-600  text-xs font-normal">
-                     {t("invested_amount")}
-                    </h4>
-                    <div className="text-sm font-medium text-default-900">
-                      $8264.35
-                    </div>
-                  </div>
+                      <div className="space-y-1">
+                        <h4 className="text-default-600 text-xs font-normal">
+                          Unique Visitors
+                        </h4>
+                        <div className="text-sm font-medium text-default-900">
+                          {overview?.uniqueVisitors?.toLocaleString() || "0"}
+                        </div>
+                      </div>
 
-                  <div className="space-y-1">
-                    <h4 className="text-default-600  text-xs font-normal">
-                     {t("invested_amount")}
-                    </h4>
-                    <div className="text-sm font-medium text-default-900">
-                      $8264.35
+                      <div className="space-y-1">
+                        <h4 className="text-default-600 text-xs font-normal">
+                          Avg Session
+                        </h4>
+                        <div className="text-sm font-medium text-default-900">
+                          {overview?.averageSessionDuration ? `${Math.round(overview.averageSessionDuration)}s` : "0s"}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>

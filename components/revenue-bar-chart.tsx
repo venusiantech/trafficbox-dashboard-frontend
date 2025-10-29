@@ -146,7 +146,12 @@ const RevenueBarChart = ({
       },
     },
     xaxis: {
-      categories: [
+      categories: timeRangeMetrics ? [
+        timeRangeMetrics['15m']?.label || "15 Minutes",
+        timeRangeMetrics['1h']?.label || "1 Hour",
+        timeRangeMetrics['7d']?.label || "7 Days",
+        timeRangeMetrics['30d']?.label || "30 Days",
+      ] : [
         "15 Minutes",
         "1 Hour",
         "7 Days",

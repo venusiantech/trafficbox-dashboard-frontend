@@ -30,16 +30,16 @@ import { Badge } from "@/components/ui/badge"
 export type CampaignPerformanceData = {
   campaignId: string;
   title: string;
-  sparkTrafficProjectId?: string;
+  projectId: string;
   hits: number;
   visits: number;
   views: number;
   uniqueVisitors: number;
   speed: number;
-  bounceRate: number;
-  sessionDuration: number;
   lastUpdated: string;
-  projectStatus: string;
+  campaignStatus: string;
+  geoType: string;
+  countries: string[];
 }
 
 const getStatusColor = (status: string) => {
@@ -65,7 +65,7 @@ export const columns: ColumnDef<CampaignPerformanceData>[] = [
             {row.original.title}
           </h4>
           <div className="text-xs font-normal text-default-600">
-            {row.original.sparkTrafficProjectId || 'N/A'}
+            {row.original.projectId || 'N/A'}
           </div>
         </div>
       </div>
@@ -105,20 +105,20 @@ export const columns: ColumnDef<CampaignPerformanceData>[] = [
     )
   },
   {
-    accessorKey: "bounceRate",
-    header: "Bounce Rate",
+    accessorKey: "geoType",
+    header: "Geo Type",
     cell: ({ row }) => (
-      <span className="font-medium">
-        {(row.getValue("bounceRate") as number * 100).toFixed(1)}%
+      <span className="capitalize font-medium text-default-600">
+        {row.getValue("geoType")}
       </span>
     )
   },
   {
-    accessorKey: "projectStatus",
+    accessorKey: "campaignStatus",
     header: "Status",
     cell: ({ row }) => (
-      <Badge className={getStatusColor(row.getValue("projectStatus"))}>
-        {row.getValue("projectStatus")}
+      <Badge className={getStatusColor(row.getValue("campaignStatus"))}>
+        {row.getValue("campaignStatus")}
       </Badge>
     )
   }

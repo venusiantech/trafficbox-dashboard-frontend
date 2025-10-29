@@ -11,40 +11,23 @@ export type DashboardOverview = {
   totalViews: number;
   uniqueVisitors: number;
   averageSpeed: number;
-  averageBounceRate: number;
-  averageSessionDuration: number;
-  topCountries: Array<{
-    country: string;
-    count: number;
-    percentage: number;
-  }>;
-  recentActivity: Array<{
-    _id: string;
-    campaign: {
-      _id: string;
-      title: string;
-    };
-    timestamp: string;
-    hits: number;
-    visits: number;
-    speed: number;
-    projectStatus: string;
-  }>;
+  topCountries: string[]; // Changed to array of country codes
   campaignPerformance: Array<{
     campaignId: string;
     title: string;
-    sparkTrafficProjectId?: string;
+    projectId: string; // Changed from sparkTrafficProjectId
     hits: number;
     visits: number;
     views: number;
     uniqueVisitors: number;
     speed: number;
-    bounceRate: number;
-    sessionDuration: number;
     lastUpdated: string;
-    projectStatus: string;
+    campaignStatus: string; // Changed from projectStatus
+    geoType: string;
+    countries: string[];
   }>;
   timeRangeMetrics: {
+    '1m'?: TimeRangeMetric;
     '15m': TimeRangeMetric;
     '1h': TimeRangeMetric;
     '7d': TimeRangeMetric;
@@ -53,6 +36,7 @@ export type DashboardOverview = {
 };
 
 export type TimeRangeMetric = {
+  label: string;
   totalHits: number;
   totalVisits: number;
   totalViews: number;
@@ -60,6 +44,7 @@ export type TimeRangeMetric = {
   avgSpeed: number;
   avgBounceRate: number;
   lastUpdated: string;
+  campaignsCount: number;
 };
 
 export type DashboardMetadata = {

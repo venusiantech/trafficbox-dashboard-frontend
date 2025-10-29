@@ -8,7 +8,6 @@ import RevinueBarChart from "@/components/revenue-bar-chart";
 import DashboardDropdown from "@/components/dashboard-dropdown";
 import OverviewChart from "./components/overview-chart";
 import CompanyTable from "./components/company-table";
-import RecentActivity from "./components/recent-activity";
 import MostSales from "./components/most-sales";
 import OverviewRadialChart from "./components/overview-radial";
 import { useTranslations } from "next-intl";
@@ -159,20 +158,38 @@ const DashboardPage = () => {
             <Card>
               <CardHeader className="flex flex-row items-center">
                 <CardTitle className="flex-1">
-                  Recent Activity
+                  Campaign Summary
                 </CardTitle>
                 <DashboardDropdown />
               </CardHeader>
               <CardContent>
                 {isLoading ? (
-                  <div className="space-y-3">
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
+                  <div className="space-y-4">
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
                   </div>
                 ) : (
-                  <RecentActivity activities={overview?.recentActivity || []} />
+                  <div className="space-y-4">
+                    <div className="bg-primary/10 rounded-lg p-4">
+                      <div className="text-xs text-default-600 mb-1">Total Campaigns</div>
+                      <div className="text-2xl font-bold text-default-900">
+                        {overview?.totalCampaigns || 0}
+                      </div>
+                    </div>
+                    <div className="bg-success/10 rounded-lg p-4">
+                      <div className="text-xs text-default-600 mb-1">Unique Visitors</div>
+                      <div className="text-2xl font-bold text-default-900">
+                        {overview?.uniqueVisitors?.toLocaleString() || 0}
+                      </div>
+                    </div>
+                    <div className="bg-info/10 rounded-lg p-4">
+                      <div className="text-xs text-default-600 mb-1">Total Views</div>
+                      <div className="text-2xl font-bold text-default-900">
+                        {overview?.totalViews?.toLocaleString() || 0}
+                      </div>
+                    </div>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -205,10 +222,10 @@ const DashboardPage = () => {
                     <div className="bg-default-50 rounded p-4 mt-8 flex justify-between flex-wrap gap-4">
                       <div className="space-y-1">
                         <h4 className="text-default-600 text-xs font-normal">
-                          Total Views
+                          Total Hits
                         </h4>
                         <div className="text-sm font-medium text-default-900">
-                          {overview?.totalViews?.toLocaleString() || "0"}
+                          {overview?.totalHits?.toLocaleString() || "0"}
                         </div>
                         <div className="text-default-500 text-xs font-normal">
                           All campaigns
@@ -217,19 +234,19 @@ const DashboardPage = () => {
 
                       <div className="space-y-1">
                         <h4 className="text-default-600 text-xs font-normal">
-                          Unique Visitors
+                          Total Visits
                         </h4>
                         <div className="text-sm font-medium text-default-900">
-                          {overview?.uniqueVisitors?.toLocaleString() || "0"}
+                          {overview?.totalVisits?.toLocaleString() || "0"}
                         </div>
                       </div>
 
                       <div className="space-y-1">
                         <h4 className="text-default-600 text-xs font-normal">
-                          Avg Session
+                          Conversion
                         </h4>
                         <div className="text-sm font-medium text-default-900">
-                          {overview?.averageSessionDuration ? `${Math.round(overview.averageSessionDuration)}s` : "0s"}
+                          {conversionRate}%
                         </div>
                       </div>
                     </div>

@@ -6,14 +6,8 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
-export type TopCountryData = {
-  country: string;
-  count: number;
-  percentage: number;
-}
-
 interface MostSalesProps {
-  topCountries?: TopCountryData[];
+  topCountries?: string[]; // Now just an array of country codes
 }
 
 const getCountryColor = (index: number) => {
@@ -30,8 +24,6 @@ const getCountryColor = (index: number) => {
 const MostSales = ({ topCountries = [] }: MostSalesProps) => {
   const [filterMap, setFilterMap] = useState("global");
   const t = useTranslations("AnalyticsDashboard");
-
-  const totalVisits = topCountries.reduce((sum, country) => sum + country.count, 0);
 
   // Show message when no data is available
   if (topCountries.length === 0) {
@@ -73,16 +65,16 @@ const MostSales = ({ topCountries = [] }: MostSalesProps) => {
         <div className="md:flex items-center gap-6">
           <div className="flex-none">
             <h4 className="text-default-600 text-sm font-normal mb-1.5">
-              Total Visits from Top Countries
+              Top Countries
             </h4>
             <div className="text-lg font-medium mb-1.5 text-default-900">
-              {totalVisits.toLocaleString()}
+              {topCountries.length} {topCountries.length === 1 ? 'Country' : 'Countries'}
             </div>
             <div className="text-xs font-light text-default-600 mb-4">
-              Across {topCountries.length} countries
+              Receiving traffic
             </div>
             <ul className="bg-default-50 rounded p-4 min-w-[184px] space-y-4 mt-4">
-              {topCountries.slice(0, 6).map((item, i) => (
+              {topCountries.slice(0, 6).map((countryCode, i) => (
                 <li
                   key={i}
                   className="flex justify-between items-center text-xs text-default-600"
@@ -91,12 +83,8 @@ const MostSales = ({ topCountries = [] }: MostSalesProps) => {
                     <span
                       className={`inline-flex h-1.5 w-1.5 bg-primary-500 ring-opacity-25 rounded-full ring-4 ${getCountryColor(i)}`}
                     ></span>
-                    <span className="font-medium">{item.country}</span>
+                    <span className="font-medium uppercase">{countryCode}</span>
                   </span>
-                  <div className="text-right">
-                    <div className="font-medium">{item.count.toLocaleString()}</div>
-                    <div className="text-[10px] text-default-500">{item.percentage.toFixed(1)}%</div>
-                  </div>
                 </li>
               ))}
             </ul>

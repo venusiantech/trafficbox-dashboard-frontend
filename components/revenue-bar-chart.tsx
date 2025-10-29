@@ -117,7 +117,7 @@ const RevenueBarChart = ({
       },
     },
     title: {
-      text: `${t("revenue_report")}`,
+      text: "Traffic Report",
       align: "left",
       offsetY: 13,
       offsetX: isRtl ? "0%" : 0,

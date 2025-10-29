@@ -59,9 +59,10 @@ interface DashboardState {
   metadata: DashboardMetadata | null;
   isLoading: boolean;
   error: string | null;
+  lastFetchTime: number | null;
   
   // Actions
-  fetchOverview: () => Promise<void>;
+  fetchOverview: (force?: boolean) => Promise<void>;
   clearError: () => void;
 }
 
@@ -72,14 +73,28 @@ export const useDashboardStore = create<DashboardState>()(
       metadata: null,
       isLoading: false,
       error: null,
+      lastFetchTime: null,
 
       // Fetch dashboard overview
-      fetchOverview: async () => {
+      fetchOverview: async (force = false) => {
+        const state = get();
+        
+        // Prevent duplicate calls within 5 seconds
+        if (!force && state.isLoading) {
+          return;
+        }
+        
+        // Use cached data if it's less than 30 seconds old
+        if (!force && state.lastFetchTime && (Date.now() - state.lastFetchTime < 30000)) {
+          return;
+        }
+        
         set({ isLoading: true, error: null });
         
         try {
           const response = await fetch('/api/alpha-dashboard/overview', {
             credentials: 'include',
+            cache: 'no-cache',
           });
           
           const data = await response.json();
@@ -91,9 +106,11 @@ export const useDashboardStore = create<DashboardState>()(
           set({ 
             overview: data.overview,
             metadata: data.metadata,
-            isLoading: false 
+            isLoading: false,
+            lastFetchTime: Date.now(),
           });
         } catch (err: any) {
+          console.error('Dashboard fetch error:', err);
           set({ 
             error: err.message || "Failed to fetch dashboard overview", 
             isLoading: false 
@@ -106,11 +123,24 @@ export const useDashboardStore = create<DashboardState>()(
     }),
     {
       name: 'dashboard-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => {
+        // Only use localStorage in browser environment
+        if (typeof window !== 'undefined') {
+          return localStorage;
+        }
+        // Return a no-op storage for SSR
+        return {
+          getItem: () => null,
+          setItem: () => {},
+          removeItem: () => {},
+        };
+      }),
       partialize: (state) => ({ 
         overview: state.overview,
-        metadata: state.metadata 
+        metadata: state.metadata,
+        // Don't persist lastFetchTime, isLoading, or error
       }),
+      skipHydration: true, // Skip hydration during SSR
     }
   )
 );

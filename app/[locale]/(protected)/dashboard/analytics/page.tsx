@@ -1,19 +1,18 @@
 "use client"
 
-import Image from "next/image";
-import { StatisticsBlock } from "@/components/blocks/statistics-block";
-import { BlockBadge, WelcomeBlock } from "@/components/blocks/welcome-block";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import RevinueBarChart from "@/components/revenue-bar-chart";
 import DashboardDropdown from "@/components/dashboard-dropdown";
 import OverviewChart from "./components/overview-chart";
 import CompanyTable from "./components/company-table";
-import MostSales from "./components/most-sales";
 import OverviewRadialChart from "./components/overview-radial";
+import WorldMapInteractive from "./components/world-map-interactive";
+import MapStatsOverlay from "./components/map-stats-overlay";
 import { useTranslations } from "next-intl";
 import { useDashboardStore } from "@/context/dashboardStore";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TrendingUp, Users, Eye, MousePointerClick, Globe } from "lucide-react";
 
 const DashboardPage = () => {
     const t = useTranslations("AnalyticsDashboard");
@@ -41,111 +40,161 @@ const DashboardPage = () => {
     }
 
     return (
-      <div>
-        <div className="grid grid-cols-12 items-center gap-5 mb-5">
-          <div className="2xl:col-span-3 lg:col-span-4 col-span-12">
-            <WelcomeBlock>
-              <div className="max-w-[180px] relative z-10">
-                <div className="text-xl font-medium text-default-900 dark:text-default-100 mb-2">
-                  {t("widget_title")}
-                </div>
-                <p className="text-sm text-default-800 dark:text-default-100">
-                  {t("widget_desc")}
-                </p>
+      <div className="space-y-6">
+        {/* Interactive World Map Section with Stats Overlay */}
+        <Card className="overflow-hidden">
+
+          <CardContent className="p-0 relative">
+            {isLoading ? (
+              <Skeleton className="h-[500px] w-full" />
+            ) : (
+              <div className="relative h-[500px] bg-default-50 dark:bg-default-900/20">
+                <WorldMapInteractive
+                  topCountries={overview?.topCountries || []}
+                  campaignPerformance={overview?.campaignPerformance || []}
+                />
+                <MapStatsOverlay
+                  stats={[
+                    {
+                      label: "Active Visitors (Last 1 Min)",
+                      value: overview?.timeRangeMetrics?.["1m"]?.uniqueVisitors?.toLocaleString() || "0",
+                    },
+                    {
+                      label: "Active Campaigns",
+                      value: overview?.campaignPerformance?.filter(c => c.campaignStatus !== "paused")?.length || 0,
+                    },
+                    {
+                      label: "Active Countries",
+                      value: overview?.topCountries?.length || 0,
+                    },
+                  ]}
+                />
               </div>
-              <BlockBadge className="end-3">{t("widget_badge")}</BlockBadge>
-              <Image
-                src="/images/all-img/widget-bg-1.png"
-                width={400}
-                height={150}
-                priority
-                alt="Description of the image"
-                className="absolute top-0 start-0 w-full h-full object-cover rounded-md"
-              />
-            </WelcomeBlock>
-          </div>
-          <div className="2xl:col-span-9 lg:col-span-8 col-span-12">
-            <Card>
-              <CardContent className="p-4">
-                {isLoading ? (
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <Skeleton className="h-20 w-full" />
-                    <Skeleton className="h-20 w-full" />
-                    <Skeleton className="h-20 w-full" />
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Stats Cards Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          {isLoading ? (
+            <>
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-32 w-full" />
+              ))}
+            </>
+          ) : (
+            <>
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Globe className="w-5 h-5 text-primary" />
+                    </div>
                   </div>
-                ) : (
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <StatisticsBlock
-                      title="Total Campaigns"
-                      total={overview?.totalCampaigns?.toString() || "0"}
-                      className="bg-info/10 border-none shadow-none"
-                    />
-                    <StatisticsBlock
-                      title="Total Hits"
-                      total={overview?.totalHits?.toLocaleString() || "0"}
-                      className="bg-warning/10 border-none shadow-none"
-                      chartColor="#FB8F65"
-                    />
-                    <StatisticsBlock
-                      title="Total Visits"
-                      total={overview?.totalVisits?.toLocaleString() || "0"}
-                      className="bg-primary/10 border-none shadow-none"
-                      chartColor="#2563eb"
-                    />
+                  <div className="text-2xl font-bold text-default-900">
+                    {overview?.totalCampaigns || 0}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                  <div className="text-sm text-default-600 mt-1">
+                    Total Campaigns
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-warning/10 rounded-lg">
+                      <MousePointerClick className="w-5 h-5 text-warning" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-default-900">
+                    {overview?.totalHits?.toLocaleString() || "0"}
+                  </div>
+                  <div className="text-sm text-default-600 mt-1">
+                    Total Hits
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-success/10 rounded-lg">
+                      <TrendingUp className="w-5 h-5 text-success" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-default-900">
+                    {overview?.totalVisits?.toLocaleString() || "0"}
+                  </div>
+                  <div className="text-sm text-default-600 mt-1">
+                    Total Visits
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-info/10 rounded-lg">
+                      <Eye className="w-5 h-5 text-info" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-default-900">
+                    {overview?.totalViews?.toLocaleString() || "0"}
+                  </div>
+                  <div className="text-sm text-default-600 mt-1">
+                    Total Views
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-secondary/10 rounded-lg">
+                      <Users className="w-5 h-5 text-secondary" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-default-900">
+                    {overview?.uniqueVisitors?.toLocaleString() || "0"}
+                  </div>
+                  <div className="text-sm text-default-600 mt-1">
+                    Unique Visitors
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
-        <div className="grid grid-cols-12 gap-5">
-          <div className="lg:col-span-8 col-span-12">
+        {/* Time Range Metrics Chart - Full Width */}
+        <Card>
+          <CardHeader className="border-b">
+            <div className="flex items-center justify-between">
+              <CardTitle>Overview</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            {isLoading ? (
+              <Skeleton className="h-[400px] w-full" />
+            ) : (
+              <RevinueBarChart timeRangeMetrics={overview?.timeRangeMetrics} />
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Campaign Performance and Analytics Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Campaign Performance Table - Takes 2 columns */}
+          <div className="lg:col-span-2">
             <Card>
-              <CardContent className="p-4">
-                {isLoading ? (
-                  <Skeleton className="h-[400px] w-full" />
-                ) : (
-                  <RevinueBarChart timeRangeMetrics={overview?.timeRangeMetrics} />
-                )}
-              </CardContent>
-            </Card>
-          </div>
-          <div className="lg:col-span-4 col-span-12">
-            <Card>
-              <CardHeader className="flex flex-row items-center">
-                <CardTitle className="flex-1">
-                  Overview Distribution
-                </CardTitle>
-                <DashboardDropdown />
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <Skeleton className="h-[373px] w-full" />
-                ) : (
-                  <OverviewChart 
-                    series={[
-                      overview?.totalHits || 0,
-                      overview?.totalVisits || 0,
-                      overview?.totalViews || 0,
-                      overview?.uniqueVisitors || 0
-                    ]}
-                    labels={["Hits", "Visits", "Views", "Unique Visitors"]}
-                  />
-                )}
-              </CardContent>
-            </Card>
-          </div>
-          <div className="lg:col-span-8 col-span-12">
-            <Card>
-              <CardHeader className="flex flex-row items-center">
-                <CardTitle className="flex-1">
-                  Campaign Performance
-                </CardTitle>
-                <DashboardDropdown />
+              <CardHeader className="border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle>Campaign Performance</CardTitle>
+                </div>
               </CardHeader>
               <CardContent className="p-0">
                 {isLoading ? (
-                  <div className="p-4">
+                  <div className="p-6">
                     <Skeleton className="h-[400px] w-full" />
                   </div>
                 ) : (
@@ -154,100 +203,63 @@ const DashboardPage = () => {
               </CardContent>
             </Card>
           </div>
-          <div className="lg:col-span-4 col-span-12">
+
+          {/* Sidebar with Overview Chart and Conversion Metrics */}
+          <div className="space-y-6">
+            {/* Overview Distribution Chart */}
             <Card>
-              <CardHeader className="flex flex-row items-center">
-                <CardTitle className="flex-1">
-                  Campaign Summary
-                </CardTitle>
-                <DashboardDropdown />
+              <CardHeader className="border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">Traffic Distribution</CardTitle>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 {isLoading ? (
-                  <div className="space-y-4">
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                  </div>
+                  <Skeleton className="h-[300px] w-full" />
                 ) : (
-                  <div className="space-y-4">
-                    <div className="bg-primary/10 rounded-lg p-4">
-                      <div className="text-xs text-default-600 mb-1">Total Campaigns</div>
-                      <div className="text-2xl font-bold text-default-900">
-                        {overview?.totalCampaigns || 0}
-                      </div>
-                    </div>
-                    <div className="bg-success/10 rounded-lg p-4">
-                      <div className="text-xs text-default-600 mb-1">Unique Visitors</div>
-                      <div className="text-2xl font-bold text-default-900">
-                        {overview?.uniqueVisitors?.toLocaleString() || 0}
-                      </div>
-                    </div>
-                    <div className="bg-info/10 rounded-lg p-4">
-                      <div className="text-xs text-default-600 mb-1">Total Views</div>
-                      <div className="text-2xl font-bold text-default-900">
-                        {overview?.totalViews?.toLocaleString() || 0}
-                      </div>
-                    </div>
-                  </div>
+                  <OverviewChart 
+                    height={300}
+                    series={[
+                      overview?.totalHits || 0,
+                      overview?.totalVisits || 0,
+                      overview?.totalViews || 0,
+                      overview?.uniqueVisitors || 0
+                    ]}
+                    labels={["Hits", "Visits", "Views", "Unique"]}
+                  />
                 )}
               </CardContent>
             </Card>
-          </div>
-          <div className="lg:col-span-8 col-span-12">
-            {isLoading ? (
-              <Card>
-                <CardContent className="p-4">
-                  <Skeleton className="h-[400px] w-full" />
-                </CardContent>
-              </Card>
-            ) : (
-              <MostSales topCountries={overview?.topCountries || []} />
-            )}
-          </div>
-          <div className="lg:col-span-4 col-span-12">
+
+            {/* Conversion Rate Card */}
             <Card>
-              <CardHeader className="flex flex-row items-center">
-                <CardTitle className="flex-1">
-                  Visit Conversion Rate
-                </CardTitle>
-                <DashboardDropdown />
+              <CardHeader className="border-b">
+                <CardTitle className="text-base">Visit Conversion</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 {isLoading ? (
-                  <Skeleton className="h-[320px] w-full" />
+                  <Skeleton className="h-[280px] w-full" />
                 ) : (
                   <>
-                    <OverviewRadialChart series={[conversionRate]} />
-                    <div className="bg-default-50 rounded p-4 mt-8 flex justify-between flex-wrap gap-4">
-                      <div className="space-y-1">
-                        <h4 className="text-default-600 text-xs font-normal">
-                          Total Hits
-                        </h4>
-                        <div className="text-sm font-medium text-default-900">
+                    <OverviewRadialChart series={[conversionRate]} height={200} />
+                    <div className="mt-6 space-y-3">
+                      <div className="flex justify-between items-center p-3 bg-primary/5 rounded-lg">
+                        <span className="text-sm text-default-600">Total Hits</span>
+                        <span className="text-sm font-bold text-default-900">
                           {overview?.totalHits?.toLocaleString() || "0"}
-                        </div>
-                        <div className="text-default-500 text-xs font-normal">
-                          All campaigns
-                        </div>
+                        </span>
                       </div>
-
-                      <div className="space-y-1">
-                        <h4 className="text-default-600 text-xs font-normal">
-                          Total Visits
-                        </h4>
-                        <div className="text-sm font-medium text-default-900">
+                      <div className="flex justify-between items-center p-3 bg-success/5 rounded-lg">
+                        <span className="text-sm text-default-600">Total Visits</span>
+                        <span className="text-sm font-bold text-default-900">
                           {overview?.totalVisits?.toLocaleString() || "0"}
-                        </div>
+                        </span>
                       </div>
-
-                      <div className="space-y-1">
-                        <h4 className="text-default-600 text-xs font-normal">
-                          Conversion
-                        </h4>
-                        <div className="text-sm font-medium text-default-900">
+                      <div className="flex justify-between items-center p-3 bg-info/5 rounded-lg">
+                        <span className="text-sm text-default-600">Conversion Rate</span>
+                        <span className="text-sm font-bold text-default-900">
                           {conversionRate}%
-                        </div>
+                        </span>
                       </div>
                     </div>
                   </>

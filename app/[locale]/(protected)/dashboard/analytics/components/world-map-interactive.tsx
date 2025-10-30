@@ -83,8 +83,8 @@ const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: Wo
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{
-          scale: 147,
-          center: [0, 20]
+          scale: 170,
+          center: [0, 30]
         }}
         className="w-full h-full"
       >
@@ -135,33 +135,33 @@ const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: Wo
           const coordinates = countryCoordinates[country];
           if (!coordinates) return null;
 
-          // Calculate marker size based on activity
+          // Calculate marker size based on activity (reduced size range)
           const totalActivity = activity.hits + activity.visits;
-          const size = Math.min(Math.max(totalActivity / 10, 8), 40);
+          const size = Math.min(Math.max(totalActivity / 20, 4), 12);
 
           return (
             <Marker key={country} coordinates={coordinates}>
               <g>
                 {/* Outer glow */}
                 <circle
-                  r={size + 4}
+                  r={size + 2}
                   fill="#3b82f6"
-                  fillOpacity={0.2}
+                  fillOpacity={0.3}
                   className="animate-pulse"
                 />
                 {/* Main marker */}
                 <circle
                   r={size}
                   fill="#3b82f6"
-                  fillOpacity={0.8}
+                  fillOpacity={0.9}
                   stroke="#fff"
-                  strokeWidth={2}
+                  strokeWidth={1.5}
                 />
                 {/* Inner highlight */}
                 <circle
-                  r={size / 2}
+                  r={size / 2.5}
                   fill="#60a5fa"
-                  fillOpacity={0.6}
+                  fillOpacity={0.8}
                 />
               </g>
             </Marker>
@@ -179,27 +179,43 @@ const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: Wo
               key={`label-${country}`}
               subject={coordinates}
               dx={0}
-              dy={-20}
+              dy={-35}
               connectorProps={{
                 stroke: mode === "dark" ? "#60a5fa" : "#3b82f6",
-                strokeWidth: 1,
+                strokeWidth: 1.5,
                 strokeLinecap: "round"
               }}
             >
-              <text
-                x={0}
-                textAnchor="middle"
-                alignmentBaseline="middle"
-                fill= "#e2e8f0"
-                fontSize={16}
-                fontWeight={600}
-                style={{
-                  pointerEvents: "none",
-                  userSelect: "none",
-                }}
-              >
-                {countryName}
-              </text>
+              <g>
+                {/* Background rectangle for better text visibility */}
+                <rect
+                  x={-countryName.length * 5}
+                  y={-10}
+                  width={countryName.length * 10}
+                  height={20}
+                  fill={mode === "dark" ? "#1e293b" : "#ffffff"}
+                  fillOpacity={0.9}
+                  rx={4}
+                  stroke={mode === "dark" ? "#3b82f6" : "#60a5fa"}
+                  strokeWidth={1}
+                />
+                {/* Text with better styling */}
+                <text
+                  x={0}
+                  y={0}
+                  textAnchor="middle"
+                  alignmentBaseline="middle"
+                  fill={mode === "dark" ? "#e2e8f0" : "#1e293b"}
+                  fontSize={12}
+                  fontWeight={600}
+                  style={{
+                    pointerEvents: "none",
+                    userSelect: "none",
+                  }}
+                >
+                  {countryName}
+                </text>
+              </g>
             </Annotation>
           );
         })}

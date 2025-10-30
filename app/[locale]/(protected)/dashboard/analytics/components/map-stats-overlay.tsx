@@ -17,7 +17,7 @@ const MapStatsOverlay = ({ stats, className }: MapStatsOverlayProps) => {
   return (
     <>
       <h2 className="text-xl z-10 absolute top-4 left-6 border-b-2 border-dashed text-default-900">Realtime Overview</h2>
-    <div className={cn("absolute top-16 left-4 z-10 space-y-3", className)}>
+    <div className={cn("absolute bottom-4 left-4 z-10 space-y-3", className)}>
       {stats.map((stat, index) => (
         <Card
           key={index}

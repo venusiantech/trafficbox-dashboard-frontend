@@ -1,6 +1,6 @@
 "use client"
 
-import { memo } from "react";
+import { memo, useState, useEffect, useRef, useCallback } from "react";
 import {
   ComposableMap,
   Geographies,
@@ -9,8 +9,79 @@ import {
   Annotation
 } from "react-simple-maps";
 import { useTheme } from "next-themes";
+import { countryCoordinates, countryNames } from "@/lib/countries";
 
 const geoUrl = "/maps/world-countries.json";
+
+// Calculate optimal viewport based on highlighted countries
+const calculateOptimalViewport = (countries: string[]) => {
+  // Default viewport for full world map
+  const defaultViewport = {
+    center: [15, 30] as [number, number],
+    scale: 170
+  };
+
+  if (countries.length === 0) {
+    return defaultViewport;
+  }
+
+  // Get valid coordinates for all highlighted countries
+  const coordinates = countries
+    .map(code => countryCoordinates[code])
+    .filter(Boolean) as [number, number][];
+
+  if (coordinates.length === 0) {
+    return defaultViewport;
+  }
+
+  // Calculate bounding box
+  const lngs = coordinates.map(coord => coord[0]);
+  const lats = coordinates.map(coord => coord[1]);
+  
+  const minLng = Math.min(...lngs);
+  const maxLng = Math.max(...lngs);
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+
+  // Calculate center point
+  const centerLng = (minLng + maxLng) / 2 - 30;
+  const centerLat = (minLat + maxLat) / 2;
+
+  // Calculate spread (how far apart the countries are)
+  const lngSpread = Math.abs(maxLng - minLng);
+  const latSpread = Math.abs(maxLat - minLat);
+  const maxSpread = Math.max(lngSpread, latSpread);
+
+  // Calculate scale based on spread
+  // Smaller spread = higher scale (zoom in more)
+  // Larger spread = lower scale (zoom out to fit all)
+  let scale: number;
+  
+  if (maxSpread < 5) {
+    // Very close countries (e.g., neighboring European countries)
+    scale = 1200;
+  } else if (maxSpread < 15) {
+    // Regional (e.g., countries in same region)
+    scale = 800;
+  } else if (maxSpread < 30) {
+    // Multi-regional (e.g., Europe + Middle East)
+    scale = 550;
+  } else if (maxSpread < 60) {
+    // Continental spread
+    scale = 400;
+  } else if (maxSpread < 100) {
+    // Multi-continental (e.g., US + Europe)
+    scale = 280;
+  } else {
+    // Global spread - keep it closer to default
+    scale = 220;
+  }
+
+  return {
+    center: [centerLng, centerLat] as [number, number],
+    scale
+  };
+};
 
 interface WorldMapInteractiveProps {
   topCountries?: string[];
@@ -23,46 +94,23 @@ interface WorldMapInteractiveProps {
   }>;
 }
 
-// Country coordinates for markers (approximate capital/center locations)
-const countryCoordinates: Record<string, [number, number]> = {
-  US: [-95.7129, 37.0902],
-  CA: [-106.3468, 56.1304],
-  AE: [53.8478, 23.4241],
-  IN: [78.9629, 20.5937],
-  GB: [-3.4360, 55.3781],
-  DE: [10.4515, 51.1657],
-  FR: [2.2137, 46.2276],
-  AU: [133.7751, -25.2744],
-  BR: [-51.9253, -14.2350],
-  JP: [138.2529, 36.2048],
-  CN: [104.1954, 35.8617],
-  RU: [105.3188, 61.5240],
-  MX: [-102.5528, 23.6345],
-  IT: [12.5674, 41.8719],
-  ES: [-3.7492, 40.4637],
-};
-
-// Country names mapping
-const countryNames: Record<string, string> = {
-  US: "United States",
-  CA: "Canada",
-  AE: "UAE",
-  IN: "India",
-  GB: "United Kingdom",
-  DE: "Germany",
-  FR: "France",
-  AU: "Australia",
-  BR: "Brazil",
-  JP: "Japan",
-  CN: "China",
-  RU: "Russia",
-  MX: "Mexico",
-  IT: "Italy",
-  ES: "Spain",
-};
-
 const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: WorldMapInteractiveProps) => {
   const { theme: mode } = useTheme();
+  
+  // State for viewport with initial default values
+  const [viewport, setViewport] = useState({
+    center: [0, 30] as [number, number],
+    scale: 170
+  });
+  
+  // State to track if map has loaded
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
+  
+  // Animation frame reference
+  const animationFrameRef = useRef<number | null>(null);
+  
+  // Ref to track current viewport for animation start point
+  const currentViewportRef = useRef({ center: [0, 30] as [number, number], scale: 170 });
 
   // Calculate country activity from campaign performance
   const countryActivity = topCountries.reduce((acc, country) => {
@@ -78,13 +126,132 @@ const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: Wo
     return acc;
   }, {} as Record<string, { hits: number; visits: number }>);
 
+  // Smooth animation function using easing
+  const animateViewport = useCallback((
+    startCenter: [number, number],
+    startScale: number,
+    endCenter: [number, number],
+    endScale: number,
+    duration: number = 1500
+  ) => {
+    // Cancel any existing animation
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+
+    const startTime = performance.now();
+
+    // Easing function (ease-in-out cubic)
+    const easeInOutCubic = (t: number): number => {
+      return t < 0.5
+        ? 4 * t * t * t
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    };
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = easeInOutCubic(progress);
+
+      // Interpolate center coordinates
+      const currentCenter: [number, number] = [
+        startCenter[0] + (endCenter[0] - startCenter[0]) * eased,
+        startCenter[1] + (endCenter[1] - startCenter[1]) * eased,
+      ];
+
+      // Interpolate scale
+      const currentScale = startScale + (endScale - startScale) * eased;
+
+      setViewport({
+        center: currentCenter,
+        scale: currentScale,
+      });
+      
+      // Update ref to track current position
+      currentViewportRef.current = {
+        center: currentCenter,
+        scale: currentScale,
+      };
+
+      if (progress < 1) {
+        animationFrameRef.current = requestAnimationFrame(animate);
+      } else {
+        animationFrameRef.current = null;
+      }
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
+  }, []);
+
+  // Update ref whenever viewport changes (for tracking)
+  useEffect(() => {
+    currentViewportRef.current = viewport;
+  }, [viewport]);
+
+  // Calculate optimal viewport after map loads and when countries change
+  useEffect(() => {
+    // Wait for map to load first
+    if (!isMapLoaded) {
+      // Small delay to ensure map is rendered
+      const timer = setTimeout(() => {
+        setIsMapLoaded(true);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+
+    // After map is loaded, calculate and animate to optimal viewport
+    if (isMapLoaded && topCountries.length > 0) {
+      const optimalViewport = calculateOptimalViewport(topCountries);
+      
+      // Small delay for smooth animation start
+      const animateTimer = setTimeout(() => {
+        // Use ref to get current viewport (avoids stale closure)
+        const startViewport = currentViewportRef.current;
+        animateViewport(
+          startViewport.center,
+          startViewport.scale,
+          optimalViewport.center,
+          optimalViewport.scale,
+          1500
+        );
+      }, 200);
+      
+      return () => {
+        clearTimeout(animateTimer);
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+        }
+      };
+    } else if (isMapLoaded && topCountries.length === 0) {
+      // Reset to default if no countries
+      const startViewport = currentViewportRef.current;
+      animateViewport(
+        startViewport.center,
+        startViewport.scale,
+        [0, 30],
+        170,
+        1500
+      );
+    }
+  }, [topCountries, isMapLoaded, animateViewport]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="w-full h-full">
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{
-          scale: 170,
-          center: [0, 30]
+          scale: viewport.scale,
+          center: viewport.center
         }}
         className="w-full h-full"
       >
@@ -110,7 +277,10 @@ const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: Wo
                   stroke={mode === "dark" ? "#1e293b" : "#cbd5e1"}
                   strokeWidth={0.5}
                   style={{
-                    default: { outline: "none" },
+                    default: { 
+                      outline: "none",
+                      transition: "fill 0.6s ease-out"
+                    },
                     hover: {
                       fill: isActive
                         ? mode === "dark"
@@ -121,8 +291,12 @@ const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: Wo
                         : "#cbd5e1",
                       outline: "none",
                       cursor: "pointer",
+                      transition: "fill 0.3s ease-out"
                     },
-                    pressed: { outline: "none" },
+                    pressed: { 
+                      outline: "none",
+                      transition: "fill 0.2s ease-out"
+                    },
                   }}
                 />
               );

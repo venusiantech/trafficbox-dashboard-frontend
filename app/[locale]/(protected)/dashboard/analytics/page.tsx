@@ -7,7 +7,7 @@ import TrafficPieChart from "@/components/traffic-pie-chart";
 import CompanyTable from "./components/company-table";
 import OverviewRadialChart from "./components/overview-radial";
 import WorldMapInteractive from "./components/world-map-interactive";
-import MapStatsOverlay from "./components/map-stats-overlay";
+import TimeRangeBarChart from "./components/time-range-bar-chart";
 import { useTranslations } from "next-intl";
 import { useDashboardStore } from "@/context/dashboardStore";
 import { useEffect } from "react";
@@ -49,25 +49,15 @@ const DashboardPage = () => {
             <Skeleton className="h-[500px] w-full" />
           ) : (
             <div className="relative h-[600px] bg-default-50 dark:bg-default-900/20">
+              <div className="absolute top-4 left-6 z-10">
+                <h2 className="text-xl border-b-2 border-dashed text-default-900 pb-2">Realtime Overview</h2>
+              </div>
               <WorldMapInteractive
                 topCountries={overview?.topCountries || []}
                 campaignPerformance={overview?.campaignPerformance || []}
               />
-              <MapStatsOverlay
-                stats={[
-                  {
-                    label: "Active Visitors (Last 1 Min)",
-                    value: overview?.timeRangeMetrics?.["1m"]?.uniqueVisitors?.toLocaleString() || "0",
-                  },
-                  {
-                    label: "Active Campaigns",
-                    value: overview?.campaignPerformance?.filter(c => c.campaignStatus !== "paused")?.length || 0,
-                  },
-                  {
-                    label: "Active Countries",
-                    value: overview?.topCountries?.length || 0,
-                  },
-                ]}
+              <TimeRangeBarChart
+                timeRangeMetrics={overview?.timeRangeMetrics}
               />
             </div>
           )}

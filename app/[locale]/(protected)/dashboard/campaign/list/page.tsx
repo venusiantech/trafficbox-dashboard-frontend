@@ -10,7 +10,7 @@ import { useTranslations } from "next-intl";
 import { useCampaignStore } from "@/context/campaignStore";
 import PageTitle from "@/components/page-title";
 import { toast } from "sonner";
-import { Play, Clock, ExternalLink, Loader2 } from "lucide-react";
+import { Play, Clock, ExternalLink, Loader2, Pause } from "lucide-react";
 
 // Dummy data generator for charts
 const generateDummyChartData = () => {
@@ -178,6 +178,7 @@ export default function CampaignsListPage() {
   const CampaignCard = ({ campaign, isArchived = false }: { campaign: any, isArchived?: boolean }) => {
     const isPaused = campaign.state === 'paused';
     const isActive = campaign.state === 'active' || campaign.state === 'created';
+    const isArchivedState = campaign.state === 'archived' || campaign.is_archived;
     const urlValues: string[] = campaign.urls ? Object.values(campaign.urls) : [];
     const displayUrl = urlValues.length > 0 ? urlValues[0] : 'N/A';
     const totalHits = campaign.stats?.totalHits || campaign.vendorStats?.totalHits || 0;
@@ -284,7 +285,7 @@ export default function CampaignsListPage() {
             </div>
 
             <div className="flex items-center gap-2 flex-shrink-0">
-              {isPaused && (
+              {isPaused && !isArchivedState && (
                 <Button
                   size="sm"
                   className="bg-green-600 hover:bg-green-700 text-white h-7 text-xs px-3"
@@ -293,6 +294,17 @@ export default function CampaignsListPage() {
                 >
                   <Play className="w-3 h-3 mr-1" />
                   Resume
+                </Button>
+              )}
+              {!isPaused && !isArchivedState && (
+                <Button
+                  size="sm"
+                  className="bg-amber-600 hover:bg-amber-700 text-white h-7 text-xs px-3"
+                  onClick={() => handlePauseCampaign(campaign.id)}
+                  disabled={processingCampaignId === campaign.id}
+                >
+                  <Pause className="w-3 h-3 mr-1" />
+                  Pause
                 </Button>
               )}
               <Button

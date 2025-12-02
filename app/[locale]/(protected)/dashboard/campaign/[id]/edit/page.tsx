@@ -13,8 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { useCampaignStore, CampaignModifyData } from "@/context/campaignStore";
 import PageTitle from "@/components/page-title";
-import Loader from "@/components/loader";
-import { ArrowLeft, Save, Plus, Trash2, X } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, X, Loader2 } from "lucide-react";
 import { countries } from "@/lib/data";
 
 type CountryAllocation = {
@@ -26,6 +25,7 @@ export default function EditCampaignPage({ params }: { params: { id: string } })
   const router = useRouter();
   const { fetchCampaign, modifyCampaign, currentCampaign, isLoading, error } = useCampaignStore();
   const [isSaving, setIsSaving] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Form state with extended fields
   const [formData, setFormData] = useState({
@@ -43,7 +43,10 @@ export default function EditCampaignPage({ params }: { params: { id: string } })
   // Load campaign data
   useEffect(() => {
     if (params.id) {
-      fetchCampaign(params.id);
+      setIsInitialLoad(true);
+      fetchCampaign(params.id).finally(() => {
+        setIsInitialLoad(false);
+      });
     }
   }, [params.id, fetchCampaign]);
 
@@ -261,7 +264,7 @@ export default function EditCampaignPage({ params }: { params: { id: string } })
       }
       await modifyCampaign(params.id, reqBody);
       toast.success("Campaign updated successfully!");
-      router.push(`/dashboard/campaign/${params.id}`);
+      router.push(`/${window.location.pathname.split('/')[1]}/dashboard/campaign/${params.id}`);
     } catch (error: any) {
       toast.error(error.message || "Failed to update campaign");
     } finally {
@@ -273,10 +276,13 @@ export default function EditCampaignPage({ params }: { params: { id: string } })
     router.back();
   };
 
-  if (isLoading && !currentCampaign) {
+  if (isLoading || isInitialLoad || (!currentCampaign && !error)) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <Loader />
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-600 dark:text-purple-400" />
+          <p className="text-sm text-gray-600 dark:text-gray-400">Loading campaign data...</p>
+        </div>
       </div>
     );
   }

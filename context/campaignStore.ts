@@ -60,25 +60,8 @@ export type CampaignCreateData = {
   url: string;
   title: string;
   urls: string[];
-  keywords: string;
-  referrers: {
-    mode: string;
-    urls: string[];
-  };
   languages: string;
-  bounce_rate: number;
-  return_rate: number;
-  click_outbound_events: number;
-  form_submit_events: number;
-  scroll_events: number;
-  time_on_page: string;
-  desktop_rate: number;
-  auto_renew: string;
   geo_type: string;
-  geo: Array<{ country: string; percent: number }>;
-  shortener: string;
-  rss_feed: string;
-  ga_id: string;
   size: string;
   speed: number;
 };

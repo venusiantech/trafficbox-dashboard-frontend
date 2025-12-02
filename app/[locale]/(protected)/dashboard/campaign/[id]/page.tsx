@@ -12,9 +12,8 @@ import { toast } from "@/components/ui/use-toast";
 import { useTranslations } from "next-intl";
 import { useCampaignStore } from "@/context/campaignStore";
 import PageTitle from "@/components/page-title";
-import Loader from "@/components/loader";
 import { StatisticsBlock } from "@/components/blocks/statistics-block";
-import { Pencil } from "lucide-react";
+import { Pencil, Loader2 } from "lucide-react";
 
 export default function CampaignDetailPage({ params }: { params: { id: string } }) {
   const t = useTranslations("AnalyticsDashboard");
@@ -23,10 +22,14 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
   const [isPauseDialogOpen, setIsPauseDialogOpen] = useState(false);
   const [isResumeDialogOpen, setIsResumeDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     if (params.id) {
-      fetchCampaign(params.id);
+      setIsInitialLoad(true);
+      fetchCampaign(params.id).finally(() => {
+        setIsInitialLoad(false);
+      });
     }
   }, [params.id, fetchCampaign]);
 
@@ -103,8 +106,15 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
     return new Date(dateString).toLocaleString();
   };
 
-  if (isLoading) {
-    return <Loader />;
+  if (isLoading || isInitialLoad || (!currentCampaign && !error)) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-600 dark:text-purple-400" />
+          <p className="text-sm text-gray-600 dark:text-gray-400">Loading campaign details...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {

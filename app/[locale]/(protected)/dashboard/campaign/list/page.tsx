@@ -9,9 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslations } from "next-intl";
 import { useCampaignStore } from "@/context/campaignStore";
 import PageTitle from "@/components/page-title";
-import Loader from "@/components/loader";
 import { toast } from "sonner";
-import { Play, Clock, ExternalLink } from "lucide-react";
+import { Play, Clock, ExternalLink, Loader2 } from "lucide-react";
 
 // Dummy data generator for charts
 const generateDummyChartData = () => {
@@ -83,16 +82,13 @@ export default function CampaignsListPage() {
   const [activeTab, setActiveTab] = useState("active");
   const [processingCampaignId, setProcessingCampaignId] = useState<string | null>(null);
   const [chartData, setChartData] = useState<Record<string, any[]>>({});
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    fetchCampaigns();
-    
-    // Generate dummy chart data for each campaign
-    const dummyData: Record<string, any[]> = {};
-    campaigns.forEach(campaign => {
-      dummyData[campaign.id] = generateDummyChartData();
+    setIsInitialLoad(true);
+    fetchCampaigns().finally(() => {
+      setIsInitialLoad(false);
     });
-    setChartData(dummyData);
   }, [fetchCampaigns]);
 
   // Update chart data when campaigns change
@@ -314,24 +310,16 @@ export default function CampaignsListPage() {
     );
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <Loader />
-      </div>
-    );
-  }
+  const displayCampaigns = activeTab === "active" ? campaigns : archivedCampaigns;
+  const displayLoading = activeTab === "active" ? (isLoading || isInitialLoad) : isArchivedLoading;
 
-  if (error) {
+  if (error && !isInitialLoad) {
     return (
       <div className="text-center py-12">
         <p className="text-red-500">{error}</p>
       </div>
     );
   }
-
-  const displayCampaigns = activeTab === "active" ? campaigns : archivedCampaigns;
-  const displayLoading = activeTab === "active" ? isLoading : isArchivedLoading;
 
   return (
     <div className="space-y-4">
@@ -362,8 +350,11 @@ export default function CampaignsListPage() {
 
         <TabsContent value="active" className="mt-4">
           {displayLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <Loader />
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="flex flex-col items-center gap-4">
+                <Loader2 className="h-8 w-8 animate-spin text-purple-600 dark:text-purple-400" />
+                <p className="text-sm text-gray-600 dark:text-gray-400">Loading campaigns...</p>
+              </div>
             </div>
           ) : displayCampaigns.length === 0 ? (
             <Card className="p-12 text-center border-gray-200">
@@ -383,8 +374,11 @@ export default function CampaignsListPage() {
 
         <TabsContent value="archived" className="mt-4">
           {displayLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <Loader />
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="flex flex-col items-center gap-4">
+                <Loader2 className="h-8 w-8 animate-spin text-purple-600 dark:text-purple-400" />
+                <p className="text-sm text-gray-600 dark:text-gray-400">Loading archived campaigns...</p>
+              </div>
             </div>
           ) : displayCampaigns.length === 0 ? (
             <Card className="p-12 text-center border-gray-200">

@@ -90,6 +90,10 @@ const TimeRangeBarChart = ({ timeRangeMetrics, className }: TimeRangeBarChartPro
       },
     },
     yaxis: {
+      min: 0,
+      max: maxValue > 0 ? Math.ceil(maxValue * 1.2) : 10,
+      tickAmount: 5,
+      forceNiceScale: true,
       labels: {
         style: {
           colors: mode === "dark" ? "#94a3b8" : "#64748b",
@@ -100,8 +104,6 @@ const TimeRangeBarChart = ({ timeRangeMetrics, className }: TimeRangeBarChartPro
           return val.toString();
         },
       },
-      max: maxValue > 0 ? Math.ceil(maxValue * 1.2) : 10,
-      tickAmount: 5,
     },
     fill: {
       opacity: 1,

@@ -26,7 +26,7 @@ export default function CreateCampaignPage() {
 
   // Form state
   const [formData, setFormData] = useState<CampaignCreateData>({
-    url: "trafficboxes.com",
+    url: "",
     title: "",
     urls: [""],
     languages: "en",
@@ -68,6 +68,14 @@ export default function CreateCampaignPage() {
         return;
       }
 
+      if (!formData.url) {
+        toast({
+          title: "Error",
+          description: "URL is required",
+          variant: "destructive",
+        });
+        return;
+      }
       if (formData.urls.some(url => !url)) {
         toast({
           title: "Error",
@@ -147,6 +155,7 @@ export default function CreateCampaignPage() {
                     onChange={handleChange}
                     placeholder="Enter campaign title"
                     className="h-11 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    required
                   />
                 </div>
 
@@ -164,6 +173,7 @@ export default function CreateCampaignPage() {
                     onChange={handleChange}
                     placeholder="Enter main URL"
                     className="h-11 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    required
                   />
                 </div>
               </div>
@@ -183,6 +193,7 @@ export default function CreateCampaignPage() {
                         onChange={(e) => handleUrlChange(index, e.target.value)}
                         placeholder="Enter target URL"
                         className="h-11 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 flex-1"
+                        required
                       />
                     </div>
                   ))}
@@ -203,6 +214,7 @@ export default function CreateCampaignPage() {
                       value={formData.speed}
                       onChange={(e) => handleSliderChange("speed", [parseInt(e.target.value) || 0])}
                       className="text-right h-9 text-sm font-mono bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
+                      required
                     />
                   </div>
                 </div>

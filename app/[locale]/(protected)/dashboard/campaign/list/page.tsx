@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslations } from "next-intl";
 import { useCampaignStore } from "@/context/campaignStore";
@@ -175,6 +174,7 @@ export default function CampaignsListPage() {
     }
   };
 
+
   const CampaignCard = ({ campaign, isArchived = false }: { campaign: any, isArchived?: boolean }) => {
     const isPaused = campaign.state === 'paused';
     const isActive = campaign.state === 'active' || campaign.state === 'created';
@@ -186,6 +186,17 @@ export default function CampaignsListPage() {
     const formattedHits = totalHits >= 1000 ? `${(totalHits / 1000).toFixed(0)}K` : totalHits;
     const formattedVisits = totalVisits >= 1000 ? `${(totalVisits / 1000).toFixed(0)}K` : totalVisits;
     const hitsDelta = totalHits > 0 ? `+${Math.floor(totalHits * 0.15)}` : '+0';
+
+    // Normalize URL to ensure it has a protocol for external links
+    const getNormalizedUrl = (url: string): string => {
+      if (url === 'N/A') return '#';
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+      }
+      return `https://${url}`;
+    };
+
+    const normalizedUrl = getNormalizedUrl(displayUrl);
 
     return (
       <Card className={`overflow-hidden transition-all`}>
@@ -230,15 +241,19 @@ export default function CampaignsListPage() {
 
           {/* URL Section with Icon */}
           <div className="mb-4 flex items-center gap-2 min-w-0">
-            <a 
-              href={displayUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate group"
-            >
-              <span className="truncate">{displayUrl}</span>
-              <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 opacity-50 group-hover:opacity-100 transition-opacity" />
-            </a>
+            {displayUrl !== 'N/A' ? (
+              <a 
+                href={normalizedUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate group"
+              >
+                <span className="truncate">{displayUrl}</span>
+                <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 opacity-50 group-hover:opacity-100 transition-opacity" />
+              </a>
+            ) : (
+              <span className="text-xs text-gray-500 dark:text-gray-400">N/A</span>
+            )}
             {campaign.spark_traffic_data?.referrer === 'google' && (
               <div className="flex items-center gap-1 ml-2 flex-shrink-0">
                 <svg className="w-3 h-3" viewBox="0 0 24 24">

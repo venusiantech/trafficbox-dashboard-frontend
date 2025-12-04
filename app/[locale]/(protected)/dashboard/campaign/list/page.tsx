@@ -82,13 +82,127 @@ export default function CampaignsListPage() {
   const [processingCampaignId, setProcessingCampaignId] = useState<string | null>(null);
   const [chartData, setChartData] = useState<Record<string, any[]>>({});
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isPollingActive, setIsPollingActive] = useState(true);
 
+  // Initial load
   useEffect(() => {
     setIsInitialLoad(true);
     fetchCampaigns().finally(() => {
       setIsInitialLoad(false);
     });
   }, [fetchCampaigns]);
+
+  // Set up polling every 15 seconds with smart pause/resume
+  useEffect(() => {
+    // Only set up polling after initial load is complete
+    if (isInitialLoad) return;
+
+    let pollInterval: NodeJS.Timeout | null = null;
+    let inactivityTimeout: NodeJS.Timeout | null = null;
+    const INACTIVITY_THRESHOLD = 60000; // 60 seconds of inactivity
+
+    // Function to check if polling should be active
+    const shouldPoll = () => {
+      return (
+        isPollingActive &&
+        !isLoading &&
+        !error &&
+        !document.hidden &&
+        document.hasFocus()
+      );
+    };
+
+    // Function to start polling
+    const startPolling = () => {
+      if (pollInterval) return; // Already polling
+      
+      pollInterval = setInterval(() => {
+        if (shouldPoll()) {
+          fetchCampaigns(true); // silent refresh
+        }
+      }, 15000); // 15 seconds
+    };
+
+    // Function to stop polling
+    const stopPolling = () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+    };
+
+    // Handle page visibility changes
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopPolling();
+      } else if (shouldPoll()) {
+        startPolling();
+      }
+    };
+
+    // Handle window focus/blur (tab focus)
+    const handleFocus = () => {
+      if (shouldPoll()) {
+        startPolling();
+      }
+    };
+
+    const handleBlur = () => {
+      stopPolling();
+    };
+
+    // Handle user activity (mouse/keyboard events)
+    const handleActivity = () => {
+      // Clear existing inactivity timeout
+      if (inactivityTimeout) {
+        clearTimeout(inactivityTimeout);
+      }
+
+      // Start polling if conditions are met
+      if (shouldPoll()) {
+        startPolling();
+      }
+
+      // Set new inactivity timeout
+      inactivityTimeout = setTimeout(() => {
+        setIsPollingActive(false);
+        stopPolling();
+      }, INACTIVITY_THRESHOLD);
+    };
+
+    // Initial check and start polling if conditions are met
+    if (shouldPoll()) {
+      startPolling();
+    }
+
+    // Set up event listeners
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('blur', handleBlur);
+    
+    // Activity detection events
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    activityEvents.forEach(event => {
+      document.addEventListener(event, handleActivity, { passive: true });
+    });
+
+    // Initial activity detection setup
+    handleActivity();
+
+    // Cleanup on unmount
+    return () => {
+      stopPolling();
+      if (inactivityTimeout) {
+        clearTimeout(inactivityTimeout);
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('blur', handleBlur);
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, handleActivity);
+      });
+    };
+  }, [fetchCampaigns, isLoading, error, isInitialLoad, isPollingActive]);
 
   // Update chart data when campaigns change
   useEffect(() => {

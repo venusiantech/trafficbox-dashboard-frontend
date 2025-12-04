@@ -111,7 +111,7 @@ interface CampaignState {
   error: string | null;
   
   // Actions
-  fetchCampaigns: () => Promise<void>;
+  fetchCampaigns: (silent?: boolean) => Promise<void>;
   fetchArchivedCampaigns: () => Promise<void>;
   fetchCampaign: (id: string) => Promise<void>;
   fetchCampaignStats: (id: string, from?: string, to?: string) => Promise<any>;
@@ -137,8 +137,11 @@ export const useCampaignStore = create<CampaignState>()(
       error: null,
 
       // Fetch all campaigns
-      fetchCampaigns: async () => {
-        set({ isLoading: true, error: null });
+      fetchCampaigns: async (silent = false) => {
+        // Only set loading state if not a silent refresh
+        if (!silent) {
+          set({ isLoading: true, error: null });
+        }
         
         try {
           const response = await fetch(`/api/campaigns`, {
@@ -156,7 +159,10 @@ export const useCampaignStore = create<CampaignState>()(
             isLoading: false 
           });
         } catch (err: any) {
-          set({ error: err.message || "Failed to fetch campaigns", isLoading: false });
+          // Only set error and loading state if not a silent refresh
+          if (!silent) {
+            set({ error: err.message || "Failed to fetch campaigns", isLoading: false });
+          }
         }
       },
 

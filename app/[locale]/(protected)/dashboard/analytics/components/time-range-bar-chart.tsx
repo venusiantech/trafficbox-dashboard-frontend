@@ -46,7 +46,7 @@ const TimeRangeBarChart = ({ timeRangeMetrics, className }: TimeRangeBarChartPro
 
   const options: any = {
     chart: {
-      type: 'bar',
+      type: 'line',
       toolbar: {
         show: false,
       },
@@ -54,22 +54,14 @@ const TimeRangeBarChart = ({ timeRangeMetrics, className }: TimeRangeBarChartPro
         enabled: false,
       },
     },
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        columnWidth: '50%',
-        borderRadius: 0,
-        dataLabels: {
-          position: 'top',
-        },
-      },
-    },
     dataLabels: {
       enabled: false,
     },
     stroke: {
-      show: false,
-      width: 0,
+      show: true,
+      curve: 'smooth',
+      width: 3,
+      colors: ['#3b82f6'],
     },
     xaxis: {
       categories: categories,
@@ -106,10 +98,28 @@ const TimeRangeBarChart = ({ timeRangeMetrics, className }: TimeRangeBarChartPro
       },
     },
     fill: {
-      opacity: 1,
-      colors: ['#3b82f6'],
+      type: 'gradient',
+      gradient: {
+        shade: 'light',
+        type: 'vertical',
+        shadeIntensity: 1,
+        gradientToColors: ['#dbeafe'],
+        inverseColors: false,
+        opacityFrom: 0.8,
+        opacityTo: 0.2,
+        stops: [0, 100],
+      },
     },
     colors: ['#3b82f6'],
+    markers: {
+      size: 5,
+      colors: ['#3b82f6'],
+      strokeColors: '#fff',
+      strokeWidth: 2,
+      hover: {
+        size: 7,
+      },
+    },
     grid: {
       show: true,
       borderColor: mode === "dark" ? "#1e293b" : "#e2e8f0",
@@ -168,7 +178,7 @@ const TimeRangeBarChart = ({ timeRangeMetrics, className }: TimeRangeBarChartPro
       <Chart
         options={options}
         series={[{ name: 'Active Users', data: seriesData }]}
-        type="bar"
+        type="line"
         height={220}
         width="100%"
       />

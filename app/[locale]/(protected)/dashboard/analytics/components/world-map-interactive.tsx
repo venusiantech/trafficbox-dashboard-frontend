@@ -256,8 +256,18 @@ const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: Wo
         className="w-full h-full"
       >
         <Geographies geography={geoUrl}>
-          {({ geographies }) =>
-            geographies.map((geo) => {
+          {({ geographies }: { geographies: any[] }) => {
+            // Add null/undefined check to prevent runtime errors
+            if (!geographies || !Array.isArray(geographies) || geographies.length === 0) {
+              return null;
+            }
+            
+            return geographies.map((geo: any) => {
+              // Add safety check for geo properties
+              if (!geo || !geo.properties) {
+                return null;
+              }
+              
               const countryCode = geo.properties.ISO_A2;
               const isActive = topCountries.includes(countryCode);
               
@@ -300,8 +310,8 @@ const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: Wo
                   }}
                 />
               );
-            })
-          }
+            });
+          }}
         </Geographies>
         
         {/* Render markers for countries with activity */}

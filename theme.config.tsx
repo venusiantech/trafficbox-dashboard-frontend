@@ -1,8 +1,8 @@
 
 import React from 'react'
-import { DocsThemeConfig } from 'nextra-theme-docs'
 import Image from 'next/image'
-const config: DocsThemeConfig = {
+
+const config = {
   logo: (
     <span className=" inline-flex gap-2.5 items-center">
       <Image src="/logo/trafficboxes_logo_full.png" priority alt="logo" width={150} height={100} />

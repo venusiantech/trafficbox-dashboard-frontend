@@ -1,6 +1,6 @@
 'use client'
 import React from "react";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
     Command,
     CommandEmpty,
@@ -29,8 +29,10 @@ const HeaderSearch = () => {
                 </button>
             </DialogTrigger>
             <DialogContent className="p-0">
-                <DialogTitle className="hidden"></DialogTitle>
-                <DialogDescription className="hidden"></DialogDescription>
+                <DialogHeader>
+                    <DialogTitle className="hidden"></DialogTitle>
+                    <DialogDescription className="hidden"></DialogDescription>
+                </DialogHeader>
                 <Command className=" bg-card">
                     <div className="flex items-center border-b border-default-200">
                         <CommandInput

@@ -121,7 +121,7 @@ export default function CreateCampaignPage() {
 
   return (
     <div>
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-4xl mx-auto md:p-6 mt-5">
         <div className="mb-4">
           <p><Link href={`/${window.location.pathname.split('/')[1]}/dashboard/campaign/list`} className="flex gap-2 text-[#044575]"> <ArrowDownNarrowWide />See all campaigns</Link></p>
         </div>
@@ -129,8 +129,8 @@ export default function CreateCampaignPage() {
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <div className="p-8">
-              <div className="flex items-center gap-4 mb-6">
+            <div className="p-4 md:p-8">
+              <div className="flex items-center gap-2 md:gap-4 mb-6">
                 <div className="flex h-12 w-12 items-center justify-center">
                   <Target className="h-6 w-6 text-purple-600 dark:text-purple-400" fill="#4b139e" stroke="white" />
                 </div>

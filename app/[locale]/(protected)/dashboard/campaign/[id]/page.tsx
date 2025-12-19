@@ -158,10 +158,10 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between md:flex-row flex-col gap-2">
         <PageTitle title={currentCampaign.title} />
         
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2">
           {/* Edit Campaign Button */}
           {currentCampaign.state !== 'archived' && (
             <Button variant="outline" onClick={handleEditCampaign}>

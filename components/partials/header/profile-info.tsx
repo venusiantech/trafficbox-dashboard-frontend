@@ -54,7 +54,7 @@ const ProfileInfo = () => {
   };
 
   return (
-    <div className="md:block hidden">
+    <div className="">
       <DropdownMenu>
         <DropdownMenuTrigger asChild className="cursor-pointer">
           <div className="flex items-center gap-3 text-default-800">

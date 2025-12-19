@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
 import { TimeRangeMetric } from "@/context/dashboardStore";
 import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -20,6 +21,16 @@ interface TimeRangeBarChartProps {
 
 const TimeRangeBarChart = ({ timeRangeMetrics, className }: TimeRangeBarChartProps) => {
   const { theme: mode } = useTheme();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Prepare data for chart
   const categories = timeRangeMetrics 
@@ -68,7 +79,7 @@ const TimeRangeBarChart = ({ timeRangeMetrics, className }: TimeRangeBarChartPro
       labels: {
         style: {
           colors: mode === "dark" ? "#94a3b8" : "#64748b",
-          fontSize: '11px',
+          fontSize: isMobile ? '9px' : '11px',
           fontFamily: 'Inter',
           fontWeight: 400,
         },
@@ -89,7 +100,7 @@ const TimeRangeBarChart = ({ timeRangeMetrics, className }: TimeRangeBarChartPro
       labels: {
         style: {
           colors: mode === "dark" ? "#94a3b8" : "#64748b",
-          fontSize: '11px',
+          fontSize: isMobile ? '9px' : '11px',
           fontFamily: 'Inter',
         },
         formatter: function (val: number) {
@@ -112,12 +123,12 @@ const TimeRangeBarChart = ({ timeRangeMetrics, className }: TimeRangeBarChartPro
     },
     colors: ['#3b82f6'],
     markers: {
-      size: 5,
+      size: isMobile ? 4 : 5,
       colors: ['#3b82f6'],
       strokeColors: '#fff',
-      strokeWidth: 2,
+      strokeWidth: isMobile ? 1.5 : 2,
       hover: {
-        size: 7,
+        size: isMobile ? 6 : 7,
       },
     },
     grid: {
@@ -158,12 +169,11 @@ const TimeRangeBarChart = ({ timeRangeMetrics, className }: TimeRangeBarChartPro
 
   if (!hasData) {
     return (
-      <div className={cn("absolute bottom-4 left-4 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-lg border border-default-200 rounded-lg p-4 w-[400px]", className)}>
-        <div className="text-xs text-default-600 uppercase tracking-wide mb-1 font-semibold">
+      <div className={cn("absolute bottom-2 left-2 sm:bottom-4 sm:left-4 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-lg border border-default-200 rounded-lg p-2 sm:p-4 w-[calc(100%-1rem)] sm:w-[400px]", className)}>
+        <div className="text-[10px] sm:text-xs text-default-600 uppercase tracking-wide mb-1 font-semibold">
           Active Users Per Time Range
-          
         </div>
-        <div className="text-sm text-default-500 text-center py-4">
+        <div className="text-xs sm:text-sm text-default-500 text-center py-2 sm:py-4">
           No data available
         </div>
       </div>
@@ -171,15 +181,15 @@ const TimeRangeBarChart = ({ timeRangeMetrics, className }: TimeRangeBarChartPro
   }
 
   return (
-    <div className={cn("absolute bottom-4 left-4 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-lg border border-default-200 rounded-lg p-2 w-[420px]", className)}>
-      <div className="text-xs text-default-600 uppercase tracking-wide m-2 font-semibold">
+    <div className={cn("absolute bottom-2 left-2 sm:bottom-4 sm:left-4 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-lg border border-default-200 rounded-lg p-2 w-[calc(100%-1rem)] sm:w-[420px]", className)}>
+      <div className="text-[10px] sm:text-xs text-default-600 uppercase tracking-wide mb-1 sm:m-2 font-semibold">
         Active Users Per Time Range
       </div>
       <Chart
         options={options}
         series={[{ name: 'Active Users', data: seriesData }]}
         type="line"
-        height={220}
+        height={isMobile ? 160 : 220}
         width="100%"
       />
     </div>

@@ -46,11 +46,11 @@ const DashboardPage = () => {
 
         <CardContent className="p-0 relative">
           {isLoading ? (
-            <Skeleton className="h-[500px] w-full" />
+            <Skeleton className="h-[400px] sm:h-[500px] md:h-[600px] w-full" />
           ) : (
-            <div className="relative h-[600px] bg-default-50 dark:bg-default-900/20">
-              <div className="absolute top-4 left-6 z-10">
-                <h2 className="text-xl border-b-2 border-dashed text-default-900 pb-2">Realtime Overview</h2>
+            <div className="relative h-[400px] sm:h-[500px] md:h-[600px] bg-default-50 dark:bg-default-900/20">
+              <div className="absolute top-2 left-2 sm:top-4 sm:left-6 z-10">
+                <h2 className="text-base sm:text-lg md:text-xl border-b-2 border-dashed text-default-900 pb-1 sm:pb-2">Realtime Overview</h2>
               </div>
               <WorldMapInteractive
                 topCountries={overview?.topCountries || []}

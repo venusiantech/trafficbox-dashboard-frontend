@@ -1,8 +1,7 @@
 import React from "react";
 import FooterContent from "./footer-content";
 import { Link } from "@/components/navigation";
-import Image from "next/image";
-import { Icon } from "@/components/ui/icon";
+import { Plus, List, User } from "lucide-react";
 
 const DashCodeFooter = async () => {
   return (
@@ -14,41 +13,29 @@ const DashCodeFooter = async () => {
         </div>
       </div>
       <div className="flex md:hidden justify-around items-center">
-        <Link href="/app/chat" className="text-default-600">
+        <Link href="/dashboard/campaign/create" className="text-default-600">
           <div>
             <span className="relative cursor-pointer rounded-full text-[20px] flex flex-col items-center justify-center mb-1">
-              <Icon icon="heroicons-outline:mail" />
-              <span className="absolute right-[5px] lg:top-0 -top-2 h-4 w-4 bg-red-500 text-[8px] font-semibold flex flex-col items-center justify-center rounded-full text-white z-99">
-                10
-              </span>
+              <Plus className="h-5 w-5" />
             </span>
-            <span className="block text-xs text-default-600">Messages</span>
+            <span className="block text-xs text-default-600">Create Campaign</span>
           </div>
         </Link>
         <Link
-          href="profile"
+          href="/dashboard/profile"
           className="relative bg-card bg-no-repeat backdrop-filter backdrop-blur-[40px] rounded-full footer-bg dark:bg-default-300 h-[65px] w-[65px] z-[-1] -mt-[40px] flex justify-center items-center"
         >
-          <div className="h-[50px] w-[50px] rounded-full relative left-[0px] top-[0px] custom-dropshadow">
-            <Image
-              src="/images/avatar/av-1.jpg"
-              alt="trafficboxes"
-              width={50}
-              height={50}
-              className="w-full h-full rounded-full border-2"
-            />
+          <div className="h-[50px] w-[50px] rounded-full relative left-[0px] top-[0px] custom-dropshadow flex items-center justify-center bg-default-100 dark:bg-default-800 border-2 border-default-200 dark:border-default-700">
+            <User className="h-6 w-6 text-default-600 dark:text-default-400" />
           </div>
         </Link>
-        <Link href="notifications">
+        <Link href="/dashboard/campaign/list">
           <div>
             <span className="relative cursor-pointer rounded-full text-[20px] flex flex-col items-center justify-center mb-1">
-              <Icon icon="heroicons-outline:bell" />
-              <span className="absolute right-[17px] lg:top-0 -top-2 h-4 w-4 bg-red-500 text-[8px] font-semibold flex flex-col items-center justify-center rounded-full text-white z-99">
-                2
-              </span>
+              <List className="h-5 w-5" />
             </span>
             <span className="block text-xs text-default-600">
-              Notifications
+              Campaign List
             </span>
           </div>
         </Link>

@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, Users, Eye, MousePointerClick, Globe } from "lucide-react";
 
 const DashboardPage = () => {
-  const t = useTranslations("AnalyticsDashboard");
+    const t = useTranslations("AnalyticsDashboard");
   const { overview, metadata, isLoading, error, fetchOverview } = useDashboardStore();
 
   useEffect(() => {
@@ -35,7 +35,7 @@ const DashboardPage = () => {
             <p className="text-destructive text-center">Error: {error}</p>
           </CardContent>
         </Card>
-      </div>
+                </div>
     );
   }
 
@@ -55,14 +55,14 @@ const DashboardPage = () => {
               <WorldMapInteractive
                 topCountries={overview?.topCountries || []}
                 campaignPerformance={overview?.campaignPerformance || []}
-              />
+                  />
               <TimeRangeBarChart
                 timeRangeMetrics={overview?.timeRangeMetrics}
-              />
-            </div>
+                  />
+                </div>
           )}
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
 
       {/* Stats Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -79,8 +79,8 @@ const DashboardPage = () => {
                 <div className="flex items-center justify-between mb-3">
                   <div className="p-2 bg-primary/10 rounded-lg">
                     <Globe className="w-5 h-5 text-primary" />
-                  </div>
-                </div>
+          </div>
+        </div>
                 <div className="text-2xl font-bold text-default-900">
                   {overview?.totalCampaigns || 0}
                 </div>
@@ -102,7 +102,7 @@ const DashboardPage = () => {
                 </div>
                 <div className="text-sm text-default-600 mt-1">
                   Total Hits
-                </div>
+          </div>
               </CardContent>
             </Card>
 
@@ -118,7 +118,7 @@ const DashboardPage = () => {
                 </div>
                 <div className="text-sm text-default-600 mt-1">
                   Total Visits
-                </div>
+          </div>
               </CardContent>
             </Card>
 
@@ -134,7 +134,7 @@ const DashboardPage = () => {
                 </div>
                 <div className="text-sm text-default-600 mt-1">
                   Total Views
-                </div>
+          </div>
               </CardContent>
             </Card>
 
@@ -143,19 +143,19 @@ const DashboardPage = () => {
                 <div className="flex items-center justify-between mb-3">
                   <div className="p-2 bg-secondary/10 rounded-lg">
                     <Users className="w-5 h-5 text-secondary" />
-                  </div>
-                </div>
+          </div>
+          </div>
                 <div className="text-2xl font-bold text-default-900">
                   {overview?.uniqueVisitors?.toLocaleString() || "0"}
-                </div>
+                    </div>
                 <div className="text-sm text-default-600 mt-1">
                   Unique Visitors
-                </div>
+                    </div>
               </CardContent>
             </Card>
           </>
         )}
-      </div>
+                  </div>
 
 
       {/* Campaign Performance and Analytics Row */}
@@ -172,13 +172,13 @@ const DashboardPage = () => {
               {isLoading ? (
                 <div className="p-6">
                   <Skeleton className="h-[400px] w-full" />
-                </div>
+                    </div>
               ) : (
                 <CompanyTable data={overview?.campaignPerformance || []} />
               )}
             </CardContent>
           </Card>
-        </div>
+                  </div>
 
         {/* Sidebar with Traffic Pie Chart and Conversion Metrics */}
         <div className="space-y-6">
@@ -230,16 +230,16 @@ const DashboardPage = () => {
                       <span className="text-sm font-bold text-default-900">
                         {conversionRate}%
                       </span>
-                    </div>
                   </div>
+                </div>
                 </>
               )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
 }
 
 export default DashboardPage;

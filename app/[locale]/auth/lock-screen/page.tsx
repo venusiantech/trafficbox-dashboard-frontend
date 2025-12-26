@@ -7,30 +7,31 @@ const LockScreen = () => {
   return (
     <div className="flex w-full items-center overflow-hidden min-h-dvh h-dvh basis-full">
       <div className="overflow-y-auto flex flex-wrap w-full h-dvh">
-        <div
-          className="lg:block hidden flex-1 overflow-hidden text-[40px] leading-[48px] text-default-600 relative z-1 bg-default-50">
-          <div className="max-w-[520px] pt-20 ps-20">
-            <Link href="/" className="mb-6 inline-block">
-              <Logo />
-            </Link>
-            <h4>
-              Unlock your Project{" "}
-              <span className="text-default-800 font-bold ms-2">
-                performance
-              </span>
-            </h4>
+      <div
+            className="lg:block hidden flex-1 overflow-hidden text-[40px] leading-[48px] text-default-600 relative z-1 bg-[#F6F7FB]">
+            <div className="max-w-[520px] pt-10 ps-20 ">
+              <Link href="/" className="mb-6 inline-block">
+                <Logo />
+              </Link>
+              <h4>
+                Unlock your Project
+                <span className="text-default-800 font-bold ms-2">
+                  performance
+                </span>
+              </h4>
+            </div>
+            <div className="absolute left-0 2xl:bottom-[-160px] bottom-[-130px] h-full w-full z-[-1]">
+              <Image
+                src="/images/auth/login-image.png"
+                alt=""
+                priority
+                width={300}
+                height={300}
+                className="mb-10 h-150 w-170 mx-auto"
+                unoptimized
+              />
+            </div>
           </div>
-          <div className="absolute left-0 2xl:bottom-[-160px] bottom-[-130px] h-full w-full z-[-1]">
-            <Image
-              width={300}
-              height={300}
-              src="/images/auth/ils1.svg"
-              priority
-              alt=""
-              className="h-full w-full object-contain"
-            />
-          </div>
-        </div>
         <div className="flex-1 relative dark:bg-default-100 bg-white">
           <div className=" h-full flex flex-col ">
             <div className="max-w-[524px] mx-auto  w-full  md:px-[42px] md:py-[44px] p-7 text-2xl text-default-900  mb-3 flex flex-col justify-center h-full">

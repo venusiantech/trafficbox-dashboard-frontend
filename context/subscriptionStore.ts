@@ -60,8 +60,8 @@ interface SubscriptionState {
 }
 
 export const useSubscriptionStore = create<SubscriptionState>()(
-  persist(
-    (set: any, get: any) => ({
+  persist<SubscriptionState>(
+    (set, get) => ({
       subscription: null,
       plans: [],
       isLoading: false,
@@ -306,11 +306,6 @@ export const useSubscriptionStore = create<SubscriptionState>()(
     {
       name: 'subscription-storage',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state: any) => ({
-        subscription: state.subscription,
-        plans: state.plans,
-        lastFetchTime: state.lastFetchTime,
-      }),
     }
   )
 );

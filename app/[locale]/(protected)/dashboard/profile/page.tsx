@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import PageTitle from "@/components/page-title";
 import Loader from "@/components/loader";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
+import { useSubscriptionStore } from "@/context/subscriptionStore";
+import { SubscriptionModal } from "@/components/subscription-modal";
+import { SubscriptionCard } from "@/components/subscription-card";
 
 interface UserProfile {
   id: string;
@@ -26,13 +30,42 @@ interface UserProfile {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  
+  const { 
+    subscription, 
+    fetchSubscription, 
+    cancelSubscription, 
+    reactivateSubscription,
+    isLoading: isSubscriptionLoading 
+  } = useSubscriptionStore();
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+    fetchSubscription();
+    
+    // Handle subscription success/cancel from URL params
+    const subscriptionStatus = searchParams.get('subscription');
+    if (subscriptionStatus === 'success') {
+      toast.success('🎉 Subscription upgraded successfully!');
+      // Refresh subscription data
+      setTimeout(() => {
+        fetchSubscription(true);
+      }, 2000);
+      
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (subscriptionStatus === 'canceled') {
+      toast.info('Subscription upgrade was canceled. You can try again anytime.');
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [searchParams]);
 
   const fetchProfile = async () => {
     try {
@@ -77,7 +110,28 @@ export default function ProfilePage() {
     return `${profile.firstName || ""} ${profile.lastName || ""}`.trim();
   };
 
-  if (isLoading) {
+  // Handle cancel subscription
+  const handleCancelSubscription = async () => {
+    try {
+      await cancelSubscription(true);
+      toast.success("Subscription will be canceled at the end of the billing period");
+      setShowCancelDialog(false);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to cancel subscription");
+    }
+  };
+
+  // Handle reactivate subscription
+  const handleReactivateSubscription = async () => {
+    try {
+      await reactivateSubscription();
+      toast.success("Subscription reactivated successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to reactivate subscription");
+    }
+  };
+
+  if (isLoading && isSubscriptionLoading) {
     return <Loader />;
   }
 
@@ -175,6 +229,15 @@ export default function ProfilePage() {
 
         {/* Account Information Card */}
         <div className="space-y-6">
+          {/* Subscription Card */}
+          <SubscriptionCard
+            subscription={subscription}
+            isLoading={isSubscriptionLoading}
+            onUpgrade={() => setShowUpgradeModal(true)}
+            onCancel={() => setShowCancelDialog(true)}
+            onReactivate={handleReactivateSubscription}
+          />
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -215,16 +278,16 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <Button 
-                className="w-full justify-start" 
-                variant="outline"
+                className="w-full justify-start border border-default-300" 
+                color="default"
                 onClick={() => router.push(`/${window.location.pathname.split('/')[1]}/dashboard/campaign/list`)}
               >
                 <Icon icon="heroicons:folder-open" className="w-4 h-4 mr-2" />
                 View Your Campaigns
               </Button>
               <Button 
-                className="w-full justify-start" 
-                variant="outline"
+                className="w-full justify-start border border-default-300" 
+                color="default"
                 onClick={() => router.push(`/${window.location.pathname.split('/')[1]}/dashboard/campaign/create`)}
               >
                 <Icon icon="heroicons:plus-circle" className="w-4 h-4 mr-2" />
@@ -234,6 +297,36 @@ export default function ProfilePage() {
           </Card>
         </div>
       </div>
+
+      {/* Subscription Upgrade Modal */}
+      <SubscriptionModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        currentPlanName={subscription?.planName}
+      />
+
+      {/* Cancel Subscription Confirmation Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Subscription?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your subscription will remain active until the end of your current billing period ({subscription?.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString() : 'the end of the period'}). After that, you'll be moved to the Free plan.
+              <br /><br />
+              You can reactivate your subscription anytime before the period ends.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCancelSubscription}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Cancel Subscription
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

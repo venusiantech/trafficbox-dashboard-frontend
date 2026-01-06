@@ -224,6 +224,7 @@ const TrafficPieChart = ({
         </Select>
       </div>
       <Chart
+        key={selectedTimeRange}
         options={options}
         series={pieSeries}
         type="donut"

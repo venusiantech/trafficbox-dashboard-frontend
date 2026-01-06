@@ -117,11 +117,11 @@ const ProfileInfo = () => {
               //   icon: "heroicons:megaphone",
               //   href: "/dashboard"
               // },
-              {
-                name: "Settings",
-                icon: "heroicons:paper-airplane",
-                href: "/dashboard"
-              },
+              // {
+              //   name: "Settings",
+              //   icon: "heroicons:paper-airplane",
+              //   href: "/dashboard"
+              // },
               // {
               //   name: "Keyboard shortcuts",
               //   icon: "heroicons:language",

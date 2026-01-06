@@ -46,7 +46,7 @@ const IconNav = ({ menuList }: IconNavProps) => {
                     <TooltipProvider disableHoverableContent key={menuIndex}>
                       <Tooltip delayDuration={100}>
                         <TooltipTrigger asChild>
-                          {submenus.length === 0 ? (
+                          {!submenus || submenus.length === 0 ? (
                             <Button
                               onClick={() =>
                                 setConfig((prevConfig) => ({

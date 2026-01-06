@@ -94,7 +94,7 @@ export function MenuClassic({ }) {
 
                                 {menus.map(
                                     ({ href, label, icon, active, id, submenus }, index) =>
-                                        submenus.length === 0 ? (
+                                        !submenus || submenus.length === 0 ? (
                                             <div className="w-full mb-2 last:mb-0" key={index}>
                                                 <TooltipProvider disableHoverableContent>
                                                     <Tooltip delayDuration={100}>

@@ -144,7 +144,7 @@ export function MenuDragAble() {
                                     >
                                         {menus.map(
                                             ({ href, label, icon, active, id, submenus }, index) =>
-                                                submenus.length === 0 ? (
+                                                !submenus || submenus.length === 0 ? (
                                                     <div className="w-full" key={index}>
                                                         <TooltipProvider disableHoverableContent>
                                                             <Tooltip delayDuration={100}>

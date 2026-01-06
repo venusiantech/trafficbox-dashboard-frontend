@@ -240,40 +240,6 @@ export default function ProfilePage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Icon icon="heroicons:sparkles" className="w-5 h-5" />
-                Credits
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">
-                {profile.credits.toLocaleString()}
-              </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Available credits
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Icon icon="heroicons:eye" className="w-5 h-5" />
-                Available Views
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">
-                {profile.availableHits.toLocaleString()}
-              </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Remaining page views
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
               <CardTitle className="text-lg">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">

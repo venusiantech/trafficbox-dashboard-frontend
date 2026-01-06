@@ -20,7 +20,7 @@ export type Menu = {
   label: string;
   active: boolean;
   icon: any;
-  submenus: Submenu[];
+  submenus?: Submenu[];
   id: string;
 };
 
@@ -41,17 +41,8 @@ export function getMenuList(pathname: string, t: any): Group[] {
           id: "dashboard",
           href: "/dashboard/analytics",
           label: t("dashboard"),
-          active: pathname.includes("/dashboard"),
+          active: pathname.includes("/dashboard/analytics"),
           icon: "heroicons-outline:home",
-          submenus: [
-            {
-              href: "/dashboard/analytics",
-              label: t("analytics"),
-              active: pathname === "/dashboard/analytics",
-              icon: "heroicons:arrow-trending-up",
-              children: [],
-            },
-          ],
         },
       ],
     },
@@ -60,28 +51,19 @@ export function getMenuList(pathname: string, t: any): Group[] {
       id: "campaign",
       menus: [
         {
-          id: "campaign",
-          href: "/dashboard/campaign",
-          label: t("campaign"),
-          active: pathname.includes("/dashboard/campaign"),
-          icon: "heroicons-outline:speakerphone",
-          submenus: [
-            {
-              href: "/dashboard/campaign/create",
-              label: t("create_campaign"),
-              active: pathname === "/dashboard/campaign/create",
-              icon: "heroicons:plus-circle",
-              children: [],
-            },
-            {
-              href: "/dashboard/campaign/list",
-              label: t("campaigns"),
-              active: pathname === "/dashboard/campaign/list",
-              icon: "heroicons:list-bullet",
-              children: [],
-            },
-          ],
+          id: "campaign-create",
+          href: "/dashboard/campaign/create",
+          label: t("create_campaign"),
+          active: pathname === "/dashboard/campaign/create",
+          icon: "heroicons:plus-circle",
         },
+        {
+          id: "campaign-list",
+          href: "/dashboard/campaign/list",
+          label: t("campaigns"),
+          active: pathname === "/dashboard/campaign/list",
+          icon: "heroicons:list-bullet",
+        }
       ],
     },
   ];
@@ -96,17 +78,8 @@ export function getHorizontalMenuList(pathname: string, t: any): Group[] {
           id: "dashboard",
           href: "/dashboard/analytics",
           label: t("dashboard"),
-          active: pathname.includes("/dashboard"),
+          active: pathname.includes("/dashboard/analytics"),
           icon: "heroicons-outline:home",
-          submenus: [
-            {
-              href: "/dashboard/analytics",
-              label: t("analytics"),
-              active: pathname === "/dashboard/analytics",
-              icon: "heroicons:arrow-trending-up",
-              children: [],
-            },
-          ],
         },
       ],
     },
@@ -115,28 +88,19 @@ export function getHorizontalMenuList(pathname: string, t: any): Group[] {
       id: "campaign",
       menus: [
         {
-          id: "campaign",
-          href: "/dashboard/campaign",
-          label: t("campaign"),
-          active: pathname.includes("/dashboard/campaign"),
-          icon: "heroicons-outline:speakerphone",
-          submenus: [
-            {
-              href: "/dashboard/campaign/create",
-              label: t("create_campaign"),
-              active: pathname === "/dashboard/campaign/create",
-              icon: "heroicons:plus-circle",
-              children: [],
-            },
-            {
-              href: "/dashboard/campaign/list",
-              label: t("campaigns"),
-              active: pathname === "/dashboard/campaign/list",
-              icon: "heroicons:list-bullet",
-              children: [],
-            },
-          ],
+          id: "campaign-create",
+          href: "/dashboard/campaign/create",
+          label: t("create_campaign"),
+          active: pathname === "/dashboard/campaign/create",
+          icon: "heroicons:plus-circle",
         },
+        {
+          id: "campaign-list",
+          href: "/dashboard/campaign/list",
+          label: t("campaigns"),
+          active: pathname === "/dashboard/campaign/list",
+          icon: "heroicons:list-bullet",
+        }
       ],
     },
   ];

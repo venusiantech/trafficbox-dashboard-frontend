@@ -38,7 +38,7 @@ export default function HorizontalMenu() {
         {menuList?.map(({ menus }, index) => (
           <React.Fragment key={index}>
             {menus.map(({ href, label, icon, submenus }, index) =>
-              submenus.length === 0 ? (
+              !submenus || submenus.length === 0 ? (
                 <MenubarMenu key={index}>
                   <MenubarTrigger asChild>
                     <Link href={href} className=" cursor-pointer">

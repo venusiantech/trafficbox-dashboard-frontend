@@ -526,7 +526,7 @@ export default function CampaignsListPage() {
               <p className="text-gray-500">No archived campaigns</p>
             </Card>
           ) : (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {displayCampaigns.map((campaign) => (
                 <CampaignCard key={campaign.id} campaign={campaign} isArchived />
               ))}

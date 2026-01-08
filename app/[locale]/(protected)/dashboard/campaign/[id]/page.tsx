@@ -13,7 +13,7 @@ import { useTranslations } from "next-intl";
 import { useCampaignStore } from "@/context/campaignStore";
 import PageTitle from "@/components/page-title";
 import { StatisticsBlock } from "@/components/blocks/statistics-block";
-import { Pencil, Loader2 } from "lucide-react";
+import { Pencil, Loader2, Clock, Globe, Code, Settings as SettingsIcon, Shield, Coins, Archive, Trash2, CreditCard } from "lucide-react";
 
 export default function CampaignDetailPage({ params }: { params: { id: string } }) {
   const t = useTranslations("AnalyticsDashboard");
@@ -37,12 +37,12 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
   const handlePauseCampaign = async () => {
     try {
       await pauseCampaign(params.id);
-      
+
       toast({
         title: "Success",
         description: "Campaign paused successfully",
       });
-      
+
       setIsPauseDialogOpen(false);
     } catch (err: any) {
       toast({
@@ -57,12 +57,12 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
   const handleResumeCampaign = async () => {
     try {
       await resumeCampaign(params.id);
-      
+
       toast({
         title: "Success",
         description: "Campaign resumed successfully",
       });
-      
+
       setIsResumeDialogOpen(false);
     } catch (err: any) {
       toast({
@@ -77,14 +77,14 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
   const handleDeleteCampaign = async () => {
     try {
       await deleteCampaign(params.id);
-      
+
       toast({
         title: "Success",
         description: "Campaign archived successfully. Will be permanently deleted after 7 days.",
       });
-      
+
       setIsDeleteDialogOpen(false);
-      
+
       // Redirect to campaigns list
       router.push(`/${window.location.pathname.split('/')[1]}/dashboard/campaign/list`);
     } catch (err: any) {
@@ -160,7 +160,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
     <div className="space-y-6">
       <div className="flex justify-between md:flex-row flex-col gap-2">
         <PageTitle title={currentCampaign.title} />
-        
+
         <div className="flex flex-wrap gap-2">
           {/* Edit Campaign Button */}
           {currentCampaign.state !== 'archived' && (
@@ -169,7 +169,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               Edit Campaign
             </Button>
           )}
-          
+
           {currentCampaign.state === 'paused' && (
             <AlertDialog open={isResumeDialogOpen} onOpenChange={setIsResumeDialogOpen}>
               <AlertDialogTrigger asChild>
@@ -191,7 +191,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               </AlertDialogContent>
             </AlertDialog>
           )}
-          
+
           {currentCampaign.state !== 'paused' && currentCampaign.state !== 'archived' && (
             <AlertDialog open={isPauseDialogOpen} onOpenChange={setIsPauseDialogOpen}>
               <AlertDialogTrigger asChild>
@@ -213,7 +213,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               </AlertDialogContent>
             </AlertDialog>
           )}
-          
+
           {currentCampaign.state !== 'archived' && (
             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
               <AlertDialogTrigger asChild>
@@ -239,35 +239,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       </div>
 
       {/* Statistics */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <StatisticsBlock
-              title={t("total_hits")}
-              total={currentCampaign.stats?.totalHits || currentCampaign.vendorStats?.totalHits || currentCampaign.total_hits_counted || 0}
-              className="bg-info/10 border-none shadow-none"
-              chartColor="#00EBFF"
-            />
-            
-            <StatisticsBlock
-              title={t("total_visits")}
-              total={currentCampaign.stats?.totalVisits || currentCampaign.vendorStats?.totalVisits || currentCampaign.total_visits_counted || 0}
-              className="bg-warning/10 border-none shadow-none"
-              chartColor="#FB8F65"
-            />
-            
-            <StatisticsBlock
-              title={t("speed")}
-              total={currentCampaign.stats?.speed || currentCampaign.vendorStats?.speed || 0}
-              className="bg-primary/10 border-none shadow-none"
-              chartColor="#2563eb"
-            />
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Campaign Overview */}
-      <Card className="p-6 border-l-4 border-l-primary/20">
+      <Card className="p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h3 className="text-lg font-semibold">Campaign Overview</h3>
@@ -277,18 +249,47 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
             {currentCampaign.state.toUpperCase()}
           </Badge>
         </div>
-        
+
+        <CardContent className="p-0 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <StatisticsBlock
+              title={t("total_hits")}
+              total={currentCampaign.stats?.totalHits || currentCampaign.vendorStats?.totalHits || currentCampaign.total_hits_counted || 0}
+              className="bg-info/10 border-none shadow-none"
+              chartColor="#00EBFF"
+            />
+
+            <StatisticsBlock
+              title={t("total_visits")}
+              total={currentCampaign.stats?.totalVisits || currentCampaign.vendorStats?.totalVisits || currentCampaign.total_visits_counted || 0}
+              className="bg-warning/10 border-none shadow-none"
+              chartColor="#FB8F65"
+            />
+
+            <StatisticsBlock
+              title={t("speed")}
+              total={currentCampaign.stats?.speed || currentCampaign.vendorStats?.speed || 0}
+              className="bg-primary/10 border-none shadow-none"
+              chartColor="#2563eb"
+            />
+          </div>
+        </CardContent>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1">
             <p className="text-xs text-gray-500 uppercase tracking-wider">Campaign ID</p>
             <p className="font-mono text-sm bg-gray-50 p-2 rounded break-all">{currentCampaign.id || currentCampaign._id}</p>
           </div>
-          
+
           <div className="space-y-1">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Created</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider">Status</p>
+            <p className="text-sm bg-gray-50 p-2 rounded capitalize">{currentCampaign.state}</p>
+          </div> 
+          <div className="space-y-1">
+            <p className="text-xs text-gray-500 uppercase tracking-wider">Status</p>
             <p className="text-sm bg-gray-50 p-2 rounded">{formatDate(currentCampaign.createdAt)}</p>
           </div>
-          
+
           <div className="space-y-1">
             <p className="text-xs text-gray-500 uppercase tracking-wider">Last Updated</p>
             <p className="text-sm bg-gray-50 p-2 rounded">{formatDate(currentCampaign.updatedAt)}</p>
@@ -300,7 +301,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               <p className="text-sm bg-gray-50 p-2 rounded">{formatDate(currentCampaign.last_stats_check)}</p>
             </div>
           )}
-          
+
           {currentCampaign.is_archived && currentCampaign.archived_at && (
             <div className="space-y-1">
               <p className="text-xs text-gray-500 uppercase tracking-wider">Archived At</p>
@@ -309,9 +310,9 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
           )}
         </div>
       </Card>
-      
+
       {/* Target URLs */}
-      <Card className="p-6">
+      {/* <Card className="p-6">
         <h3 className="text-lg font-semibold mb-4">Target URLs</h3>
         
         {(() => {
@@ -340,100 +341,144 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
             </div>
           );
         })()}
-      </Card>
-      
+      </Card> */}
+
       {/* Campaign Configuration */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Duration & Geography */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Duration & Geography</h3>
-          
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-gray-500 mb-2">Duration</p>
-              <div className="flex gap-4 text-sm">
-                <span>Min: {currentCampaign.duration_min || "N/A"} min</span>
-                <span>Max: {currentCampaign.duration_max || "N/A"} min</span>
+          <div className="flex items-center gap-2 mb-6">
+            <Globe className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <h3 className="text-lg font-semibold">Duration & Geography</h3>
+          </div>
+
+          <div className="space-y-5">
+            {/* Duration */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="h-4 w-4 text-gray-400" />
+                <p className="text-xs text-gray-500 uppercase tracking-wider">Duration</p>
+              </div>
+              <div className="flex gap-4 text-sm bg-gray-50 dark:bg-gray-800/50 p-2 rounded">
+                <span className="font-medium">Min: {currentCampaign.duration_min || "N/A"} min</span>
+                <span className="text-gray-400">•</span>
+                <span className="font-medium">Max: {currentCampaign.duration_max || "N/A"} min</span>
               </div>
             </div>
-            
+
             <Separator />
-            
-            <div>
-              <p className="text-sm text-gray-500 mb-2">Countries</p>
-              <div className="text-sm">
+
+            {/* Countries */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 mb-2">
+                <Globe className="h-4 w-4 text-gray-400" />
+                <p className="text-xs text-gray-500 uppercase tracking-wider">Countries</p>
+              </div>
+              <div className="text-sm bg-gray-50 dark:bg-gray-800/50 p-2 rounded">
                 {currentCampaign.countries && currentCampaign.countries.length > 0 ? (
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {currentCampaign.countries.map((country, idx) => {
                       // Handle both old format (string) and new format (object)
                       if (typeof country === 'string') {
-                        return <span key={idx} className="inline-block mr-2">{country}</span>;
+                        return (
+                          <span key={idx} className="inline-block mr-2 px-2 py-1 bg-white dark:bg-gray-700 rounded text-xs font-medium">
+                            {country}
+                          </span>
+                        );
                       } else {
                         return (
                           <div key={idx} className="flex items-center gap-2">
                             <span className="font-medium">{country.country}</span>
                             <span className="text-gray-400">-</span>
-                            <span className="text-gray-600">{(country.percent * 100).toFixed(0)}%</span>
+                            <span className="text-gray-600 dark:text-gray-300">{(country.percent * 100).toFixed(0)}%</span>
                           </div>
                         );
                       }
                     })}
                   </div>
                 ) : (
-                  <span>All Countries</span>
+                  <span className="text-gray-600 dark:text-gray-300">All Countries</span>
                 )}
               </div>
             </div>
-            
-            <div>
-              <p className="text-sm text-gray-500 mb-2">Rule</p>
-              <p className="text-sm">{currentCampaign.rule || "N/A"}</p>
+
+            {/* Rule */}
+            <div className="space-y-1">
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Rule</p>
+              <p className="text-sm bg-gray-50 dark:bg-gray-800/50 p-2 rounded">{currentCampaign.rule || "N/A"}</p>
             </div>
 
+            {/* Macros */}
             {currentCampaign.macros && (
-              <div>
-                <p className="text-sm text-gray-500 mb-2">Macros</p>
-                <p className="text-sm font-mono">{currentCampaign.macros}</p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <Code className="h-4 w-4 text-gray-400" />
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">Macros</p>
+                </div>
+                <p className="text-sm font-mono bg-gray-50 dark:bg-gray-800/50 p-2 rounded break-all">{currentCampaign.macros}</p>
               </div>
             )}
           </div>
         </Card>
-        
+
         {/* Settings */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Settings</h3>
-          
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-gray-500">Adult Content</span>
+          <div className="flex items-center gap-2 mb-6">
+            <SettingsIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            <h3 className="text-lg font-semibold">Settings</h3>
+          </div>
+
+          <div className="space-y-1">
+            {/* Adult Content */}
+            <div className="flex items-center justify-between py-3 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <Shield className="h-4 w-4 text-gray-400" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Adult Content</span>
+              </div>
               <Switch checked={currentCampaign.is_adult} disabled />
             </div>
-            
+
             <Separator />
-            
-            <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-gray-500">Coin Mining</span>
+
+            {/* Coin Mining */}
+            <div className="flex items-center justify-between py-3 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <Coins className="h-4 w-4 text-gray-400" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Coin Mining</span>
+              </div>
               <Switch checked={currentCampaign.is_coin_mining} disabled />
             </div>
-            
+
             <Separator />
-            
-            <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-gray-500">Archived</span>
+
+            {/* Archived */}
+            <div className="flex items-center justify-between py-3 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <Archive className="h-4 w-4 text-gray-400" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Archived</span>
+              </div>
               <Switch checked={currentCampaign.is_archived} disabled />
             </div>
-            
+
             <Separator />
-            
-            <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-gray-500">Delete Eligible</span>
+
+            {/* Delete Eligible */}
+            <div className="flex items-center justify-between py-3 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <Trash2 className="h-4 w-4 text-gray-400" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Delete Eligible</span>
+              </div>
               <Switch checked={currentCampaign.delete_eligible} disabled />
             </div>
 
             <Separator />
-            
-            <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-gray-500">Credit Deduction</span>
+
+            {/* Credit Deduction */}
+            <div className="flex items-center justify-between py-3 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <CreditCard className="h-4 w-4 text-gray-400" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Credit Deduction</span>
+              </div>
               <Switch checked={currentCampaign.credit_deduction_enabled || false} disabled />
             </div>
           </div>

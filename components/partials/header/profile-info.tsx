@@ -112,6 +112,16 @@ const ProfileInfo = () => {
                 icon: "heroicons:user",
                 href: "/dashboard/profile"
               },
+              {
+                name: "My Subscriptions",
+                icon: "heroicons:sparkles",
+                href: "/dashboard/subscriptions"
+              },
+              {
+                name: "My Payments",
+                icon: "heroicons:credit-card",
+                href: "/dashboard/payments"
+              },
               // {
               //   name: "Billing",
               //   icon: "heroicons:megaphone",

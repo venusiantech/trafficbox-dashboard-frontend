@@ -6,6 +6,7 @@ import DashCodeFooter from "@/components/partials/footer";
 import DashCodeHeader from "@/components/partials/header";
 import ProtectedRoute from "@/components/protected-route";
 import AutoLogout from "@/components/auto-logout";
+import SubscriptionInfoStrip from "@/components/subscription-info-strip";
 
 const layout = async ({ children }: { children: React.ReactNode }) => {
   return (
@@ -14,6 +15,7 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
         <AutoLogout />
         {/* <ThemeCustomize /> */}
         <DashCodeHeader />
+        <SubscriptionInfoStrip />
         <DashCodeSidebar />
         <LayoutContentProvider>{children}</LayoutContentProvider>
         <DashCodeFooter />

@@ -57,6 +57,7 @@ interface SubscriptionState {
   canCreateCampaign: () => boolean;
   getUpgradeRecommendation: () => string | null;
   clearError: () => void;
+  clearSubscription: () => void;
 }
 
 export const useSubscriptionStore = create<SubscriptionState>()(
@@ -88,7 +89,11 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         try {
           const response = await fetch('/api/subscription/subscription', {
             credentials: 'include',
-            cache: 'no-cache',
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+            },
           });
           
           const data = await response.json();
@@ -302,6 +307,14 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 
       // Clear error
       clearError: () => set({ error: null }),
+
+      // Clear subscription data (for logout)
+      clearSubscription: () => set({ 
+        subscription: null, 
+        plans: [], 
+        error: null, 
+        lastFetchTime: null 
+      }),
     }),
     {
       name: 'subscription-storage',

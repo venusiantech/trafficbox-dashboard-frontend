@@ -278,10 +278,10 @@ const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: Wo
                   fill={
                     isActive
                       ? mode === "dark"
-                        ? "#3b82f6"
-                        : "#60a5fa"
+                        ? "#334155"
+                        : "#334155"
                       : mode === "dark"
-                      ? "#334155"
+                      ? "#1e293b"
                       : "#e2e8f0"
                   }
                   stroke={mode === "dark" ? "#1e293b" : "#cbd5e1"}
@@ -294,10 +294,10 @@ const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: Wo
                     hover: {
                       fill: isActive
                         ? mode === "dark"
-                          ? "#2563eb"
-                          : "#3b82f6"
+                          ? "#475569"
+                          : "#475569"
                         : mode === "dark"
-                        ? "#475569"
+                        ? "#334155"
                         : "#cbd5e1",
                       outline: "none",
                       cursor: "pointer",
@@ -329,14 +329,14 @@ const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: Wo
                 {/* Outer glow */}
                 <circle
                   r={size + 2}
-                  fill="#3b82f6"
+                  fill="#334155"
                   fillOpacity={0.3}
                   className="animate-pulse"
                 />
                 {/* Main marker */}
                 <circle
                   r={size}
-                  fill="#3b82f6"
+                  fill="#334155"
                   fillOpacity={0.9}
                   stroke="#fff"
                   strokeWidth={1.5}
@@ -344,7 +344,7 @@ const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: Wo
                 {/* Inner highlight */}
                 <circle
                   r={size / 2.5}
-                  fill="#60a5fa"
+                  fill="#475569"
                   fillOpacity={0.8}
                 />
               </g>
@@ -365,7 +365,7 @@ const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: Wo
               dx={0}
               dy={-35}
               connectorProps={{
-                stroke: mode === "dark" ? "#60a5fa" : "#3b82f6",
+                stroke: mode === "dark" ? "#475569" : "#334155",
                 strokeWidth: 1.5,
                 strokeLinecap: "round"
               }}
@@ -380,7 +380,7 @@ const WorldMapInteractive = ({ topCountries = [], campaignPerformance = [] }: Wo
                   fill={mode === "dark" ? "#1e293b" : "#ffffff"}
                   fillOpacity={0.9}
                   rx={4}
-                  stroke={mode === "dark" ? "#3b82f6" : "#60a5fa"}
+                  stroke={mode === "dark" ? "#334155" : "#475569"}
                   strokeWidth={1}
                 />
                 {/* Text with better styling */}

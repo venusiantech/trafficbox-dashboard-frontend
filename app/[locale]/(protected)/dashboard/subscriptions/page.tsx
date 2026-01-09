@@ -63,9 +63,14 @@ export default function SubscriptionsPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [showCardSelection, setShowCardSelection] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
+  const [upgradingToPlan, setUpgradingToPlan] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
+    fetchPaymentMethods();
     
     // Handle Stripe checkout success/cancel redirects
     const urlParams = new URLSearchParams(window.location.search);
@@ -112,7 +117,48 @@ export default function SubscriptionsPage() {
     }
   };
 
-  const handleUpgrade = async (planName: string) => {
+  const fetchPaymentMethods = async () => {
+    try {
+      const response = await fetch("/api/subscription/payment-methods");
+      if (!response.ok) throw new Error("Failed to fetch payment methods");
+      
+      const data = await response.json();
+      setPaymentMethods(data.paymentMethods || []);
+      
+      // Auto-select default payment method
+      const defaultMethod = data.paymentMethods?.find((pm: any) => pm.isDefault);
+      if (defaultMethod) {
+        setSelectedPaymentMethod(defaultMethod.id);
+      }
+    } catch (err: any) {
+      console.error("Error fetching payment methods:", err);
+    }
+  };
+
+  const formatCardDisplay = (card: any) => {
+    return `${card.brand.toUpperCase()} •••• ${card.last4}`;
+  };
+
+  const handleUpgradeClick = async (planName: string) => {
+    // If user has multiple cards, show selection modal
+    if (paymentMethods.length > 1) {
+      setUpgradingToPlan(planName);
+      setShowCardSelection(true);
+      return;
+    }
+
+    // If no payment method, prompt to add one
+    if (paymentMethods.length === 0) {
+      await handleUpgrade(planName);
+      // toast.error("Please add a payment method first");
+      // return;
+    }
+
+    // Single card - proceed directly
+    await handleUpgrade(planName, paymentMethods[0].id);
+  };
+
+  const handleUpgrade = async (planName: string, paymentMethodId?: string) => {
     try {
       setActionLoading(true);
       setSelectedPlan(planName);
@@ -142,11 +188,16 @@ export default function SubscriptionsPage() {
         window.location.href = data.url;
       } else {
         // Existing paid users: Instant upgrade
-        const response = await fetch("/api/subscription/upgrade", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ planName }),
-        });
+      const requestBody: any = { planName };
+      if (paymentMethodId) {
+        requestBody.paymentMethodId = paymentMethodId;
+      }
+
+      const response = await fetch("/api/subscription/upgrade", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
 
         const data = await response.json();
 
@@ -167,6 +218,17 @@ export default function SubscriptionsPage() {
     if (subscription?.planName !== "free") {
       setActionLoading(false);
       setSelectedPlan(null);
+    }
+  };
+
+  const handleConfirmUpgradeWithCard = async () => {
+    if (!selectedPaymentMethod) {
+      toast.error("Please select a payment method");
+      return;
+    }
+    if (upgradingToPlan) {
+      setShowCardSelection(false);
+      await handleUpgrade(upgradingToPlan, selectedPaymentMethod);
     }
   };
 
@@ -277,6 +339,48 @@ export default function SubscriptionsPage() {
     return colors[planName] || "default";
   };
 
+  const getPlanStyles = (planName: string) => {
+    const planStyles: { [key: string]: { bg: string; border: string; text: string } } = {
+      free: {
+        bg: "#64748B", // Slate Gray
+        border: "2px solid #64748B",
+        text: "#ffffff"
+      },
+      starter: {
+        bg: "#B87333", // Rich Bronze
+        border: "2px solid #B87333",
+        text: "#ffffff"
+      },
+      growth: {
+        bg: "#C0C0C0", // True Silver
+        border: "2px solid #C0C0C0",
+        text: "#1e293b"
+      },
+      business: {
+        bg: "#FFD700", // Rich Gold
+        border: "2px solid #FFD700",
+        text: "#1e293b"
+      },
+      premium: {
+        bg: "#5B21B6", // Dark Purple (like logo)
+        border: "2px solid #5B21B6",
+        text: "#ffffff"
+      },
+    };
+    return planStyles[planName] || planStyles.free;
+  };
+
+  const getPlanGradient = (planName: string) => {
+    const gradients: { [key: string]: string } = {
+      free: "linear-gradient(135deg, rgba(100, 116, 139, 0.08) 0%, rgba(100, 116, 139, 0.02) 100%)",
+      starter: "linear-gradient(135deg, rgba(184, 115, 51, 0.12) 0%, rgba(184, 115, 51, 0.03) 100%)",
+      growth: "linear-gradient(135deg, rgba(192, 192, 192, 0.15) 0%, rgba(192, 192, 192, 0.04) 100%)",
+      business: "linear-gradient(135deg, rgba(255, 215, 0, 0.18) 0%, rgba(255, 215, 0, 0.04) 100%)",
+      premium: "linear-gradient(135deg, rgba(91, 33, 182, 0.20) 0%, rgba(91, 33, 182, 0.05) 100%)",
+    };
+    return gradients[planName] || gradients.free;
+  };
+
   const isPlanHigher = (planA: string, planB: string) => {
     const hierarchy = ["free", "starter", "growth", "business", "premium"];
     return hierarchy.indexOf(planA) > hierarchy.indexOf(planB);
@@ -318,7 +422,14 @@ export default function SubscriptionsPage() {
               <div>
                 <CardTitle className="text-2xl capitalize flex items-center gap-2">
                   {subscription.planName} Plan
-                  <Badge color={getPlanColor(subscription.planName) as any} className="capitalize">
+                  <Badge 
+                    className="capitalize font-semibold"
+                    style={{
+                      backgroundColor: getPlanStyles(subscription.planName).bg,
+                      border: getPlanStyles(subscription.planName).border,
+                      color: getPlanStyles(subscription.planName).text,
+                    }}
+                  >
                     {subscription.status}
                   </Badge>
                 </CardTitle>
@@ -427,16 +538,17 @@ export default function SubscriptionsPage() {
               return (
                 <Card
                   key={plan.planName}
-                  className={`relative ${isCurrentPlan ? 'border-primary border-2' : ''}`}
+                  className={`relative overflow-hidden ${isCurrentPlan ? 'ring-2 ring-offset-2' : 'border'}`}
+                  style={{
+                    background: getPlanGradient(plan.planName),
+                    borderColor: isCurrentPlan ? getPlanStyles(plan.planName).bg : '#e5e7eb',
+                    '--tw-ring-color': getPlanStyles(plan.planName).bg,
+                  } as React.CSSProperties}
                 >
-                  {isCurrentPlan && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge color="primary">Current Plan</Badge>
-                    </div>
-                  )}
-
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-lg capitalize">{plan.planName}</CardTitle>
+                  <CardHeader className="pb-4 relative z-[1]">
+                    <CardTitle className="text-lg capitalize font-bold">
+                      {plan.planName}
+                    </CardTitle>
                     <div className="mt-2">
                       <span className="text-3xl font-bold">{formatCurrency(plan.price)}</span>
                       {plan.price > 0 && <span className="text-muted-foreground">/month</span>}
@@ -465,7 +577,7 @@ export default function SubscriptionsPage() {
                         <>
                           <Button
                             className="w-full gap-2"
-                            onClick={() => handleUpgrade(plan.planName)}
+                            onClick={() => handleUpgradeClick(plan.planName)}
                             disabled={actionLoading}
                           >
                             {actionLoading && selectedPlan === plan.planName ? (
@@ -518,6 +630,79 @@ export default function SubscriptionsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Card Selection Dialog */}
+      <AlertDialog open={showCardSelection} onOpenChange={setShowCardSelection}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Choose Payment Method</AlertDialogTitle>
+            <AlertDialogDescription>
+              Select which card you'd like to use for this upgrade.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-3 my-4">
+            {paymentMethods.map((pm) => (
+              <Card 
+                key={pm.id} 
+                className={`cursor-pointer transition-all ${
+                  selectedPaymentMethod === pm.id 
+                    ? 'ring-2 ring-primary' 
+                    : 'hover:border-primary'
+                }`}
+                onClick={() => setSelectedPaymentMethod(pm.id)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value={pm.id}
+                      checked={selectedPaymentMethod === pm.id}
+                      onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                      className="w-4 h-4"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Icon icon="heroicons:credit-card" className="w-5 h-5" />
+                        <span className="font-medium">
+                          {pm.card ? formatCardDisplay(pm.card) : pm.type}
+                        </span>
+                        {pm.isDefault && (
+                          <Badge color="success" className="text-xs">
+                            Default
+                          </Badge>
+                        )}
+                      </div>
+                      {pm.card && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Expires {pm.card.expMonth}/{pm.card.expYear}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setShowCardSelection(false);
+              setUpgradingToPlan(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmUpgradeWithCard}
+              disabled={actionLoading || !selectedPaymentMethod}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {actionLoading ? "Processing..." : "Confirm Upgrade"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Cancel Confirmation Dialog */}
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>

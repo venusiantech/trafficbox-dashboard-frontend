@@ -43,7 +43,6 @@ const DashboardPage = () => {
     <div className="space-y-6">
       {/* Interactive World Map Section with Stats Overlay */}
       <Card className="overflow-hidden">
-
         <CardContent className="p-0 relative">
           {isLoading ? (
             <Skeleton className="h-[400px] sm:h-[500px] md:h-[600px] w-full" />

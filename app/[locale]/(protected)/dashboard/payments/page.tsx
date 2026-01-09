@@ -47,6 +47,18 @@ interface PaymentsResponse {
   currentPage: number;
 }
 
+interface PaymentMethod {
+  id: string;
+  type: string;
+  card?: {
+    brand: string;
+    last4: string;
+    expMonth: number;
+    expYear: number;
+  };
+  isDefault: boolean;
+}
+
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,9 +66,31 @@ export default function PaymentsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalFound, setTotalFound] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  
+  // Payment methods state
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [isPaymentMethodsLoading, setIsPaymentMethodsLoading] = useState(false);
+  const [isAddingMethod, setIsAddingMethod] = useState(false);
 
   useEffect(() => {
     fetchPayments();
+    fetchPaymentMethods();
+
+    // Handle payment method redirect success/cancel
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentMethodStatus = urlParams.get('payment-method');
+    
+    if (paymentMethodStatus === 'success') {
+      toast.success('Payment method added successfully!');
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+      // Refresh payment methods
+      setTimeout(() => fetchPaymentMethods(), 1000);
+    } else if (paymentMethodStatus === 'cancel') {
+      toast.info('Payment method addition was canceled.');
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   }, [currentPage]);
 
   const fetchPayments = async () => {
@@ -151,6 +185,117 @@ export default function PaymentsPage() {
     }
   };
 
+  // Fetch payment methods
+  const fetchPaymentMethods = async () => {
+    try {
+      setIsPaymentMethodsLoading(true);
+      const response = await fetch('/api/subscription/payment-methods');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch payment methods');
+      }
+      
+      const data = await response.json();
+      setPaymentMethods(data.paymentMethods || []);
+    } catch (err: any) {
+      console.error('Error fetching payment methods:', err);
+      toast.error('Failed to load payment methods');
+    } finally {
+      setIsPaymentMethodsLoading(false);
+    }
+  };
+
+  // Add payment method
+  const handleAddPaymentMethod = async () => {
+    try {
+      setIsAddingMethod(true);
+      
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const successUrl = `${origin}/en/dashboard/payments?payment-method=success`;
+      const cancelUrl = `${origin}/en/dashboard/payments?payment-method=cancel`;
+
+      const response = await fetch('/api/subscription/add-payment-method', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          successUrl,
+          cancelUrl,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create payment method session');
+      }
+
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (err: any) {
+      console.error('Error adding payment method:', err);
+      toast.error(err.message || 'Failed to add payment method');
+      setIsAddingMethod(false);
+    }
+  };
+
+  // Remove payment method
+  const handleRemovePaymentMethod = async (id: string) => {
+    try {
+      const response = await fetch(`/api/subscription/payment-methods/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to remove payment method');
+      }
+      
+      toast.success('Payment method removed successfully');
+      fetchPaymentMethods();
+    } catch (err: any) {
+      console.error('Error removing payment method:', err);
+      toast.error(err.message || 'Failed to remove payment method');
+    }
+  };
+
+  // Set default payment method
+  const handleSetDefaultPaymentMethod = async (id: string) => {
+    try {
+      const response = await fetch(`/api/subscription/payment-methods/${id}`, {
+        method: 'PATCH',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to set default payment method');
+      }
+      
+      toast.success('Default payment method updated');
+      fetchPaymentMethods();
+    } catch (err: any) {
+      console.error('Error setting default payment method:', err);
+      toast.error(err.message || 'Failed to set default payment method');
+    }
+  };
+
+  // Get card brand icon
+  const getCardBrandIcon = (brand: string) => {
+    switch (brand.toLowerCase()) {
+      case 'visa':
+        return 'logos:visa';
+      case 'mastercard':
+        return 'logos:mastercard';
+      case 'amex':
+        return 'logos:amex';
+      default:
+        return 'heroicons:credit-card';
+    }
+  };
+
   if (isLoading && payments.length === 0) {
     return <Loader />;
   }
@@ -217,12 +362,15 @@ export default function PaymentsPage() {
         </Card>
       </div>
 
-      {/* Payments Table */}
-      <Card>
-        <CardHeader className="border-b">
-          <CardTitle className="text-xl font-semibold">Payment History</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Left Column - Payment History */}
+        <div className="xl:col-span-2">
+          <Card>
+            <CardHeader className="border-b">
+              <CardTitle className="text-xl font-semibold">Payment History</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
           {error ? (
             <div className="flex flex-col items-center justify-center py-16 px-4">
               <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
@@ -396,8 +544,104 @@ export default function PaymentsPage() {
               )}
             </>
           )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column - Payment Methods */}
+        <div className="xl:col-span-1">
+          <Card>
+            <CardHeader className="border-b">
+              <CardTitle className="text-xl font-semibold">Payment Methods</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              {/* Add Payment Method Button */}
+              <Button
+                onClick={handleAddPaymentMethod}
+                className="w-full"
+                variant="outline"
+                disabled={isAddingMethod}
+              >
+                <Icon icon="heroicons:plus" className="w-4 h-4 mr-2" />
+                Add Payment Method
+              </Button>
+
+              {/* Payment Methods List */}
+              {isPaymentMethodsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Icon icon="heroicons:arrow-path" className="w-6 h-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : paymentMethods.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
+                    <Icon icon="heroicons:credit-card" className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">No payment methods added</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {paymentMethods.map((method) => (
+                    <Card key={method.id} className={`relative ${method.isDefault ? 'ring-2 ring-primary' : ''}`}>
+                      <CardContent className="p-4">
+                        {method.isDefault && (
+                          <Badge className="absolute -top-2 left-4" color="primary">
+                            Default
+                          </Badge>
+                        )}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Icon 
+                              icon={getCardBrandIcon(method.card?.brand || 'card')} 
+                              className="w-8 h-8"
+                            />
+                            <div>
+                              <p className="font-medium capitalize">
+                                {method.card?.brand || method.type}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                •••• {method.card?.last4}
+                              </p>
+                              {method.card && (
+                                <p className="text-xs text-muted-foreground">
+                                  Expires {method.card.expMonth}/{method.card.expYear}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button className="p-1 hover:bg-muted rounded">
+                                <Icon icon="heroicons:ellipsis-vertical" className="w-5 h-5" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {!method.isDefault && (
+                                <DropdownMenuItem 
+                                  onClick={() => handleSetDefaultPaymentMethod(method.id)}
+                                >
+                                  <Icon icon="heroicons:star" className="w-4 h-4 mr-2" />
+                                  Set as Default
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem 
+                                onClick={() => handleRemovePaymentMethod(method.id)}
+                                className="text-destructive"
+                              >
+                                <Icon icon="heroicons:trash" className="w-4 h-4 mr-2" />
+                                Remove
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

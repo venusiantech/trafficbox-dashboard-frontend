@@ -175,6 +175,9 @@ export const AuthContextProvider = ({
       // Clear user data from localStorage
       localStorage.removeItem("user");
       
+      // Clear subscription storage
+      localStorage.removeItem("subscription-storage");
+      
       // Reset state
       setUser(null);
       setIsAuthenticated(false);
@@ -185,6 +188,7 @@ export const AuthContextProvider = ({
       console.error("Logout error:", error);
       // Even if API call fails, clear local state
       localStorage.removeItem("user");
+      localStorage.removeItem("subscription-storage");
       setUser(null);
       setIsAuthenticated(false);
       router.push("/en/auth/login");

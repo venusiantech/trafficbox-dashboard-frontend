@@ -7,6 +7,7 @@ import DashCodeHeader from "@/components/partials/header";
 import ProtectedRoute from "@/components/protected-route";
 import AutoLogout from "@/components/auto-logout";
 import SubscriptionInfoStrip from "@/components/subscription-info-strip";
+import { TawkToScript } from "@/components/tawk-to-script";
 
 const layout = async ({ children }: { children: React.ReactNode }) => {
   return (
@@ -19,6 +20,7 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
         <DashCodeSidebar />
         <LayoutContentProvider>{children}</LayoutContentProvider>
         <DashCodeFooter />
+        <TawkToScript />
       </LayoutProvider>
     </ProtectedRoute>
   );

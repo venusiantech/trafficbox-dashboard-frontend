@@ -117,7 +117,7 @@ export default function CreateCampaignPage() {
   const locale = typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : 'en';
 
   return (
-    <div className="flex-1">
+    <div className="flex-1 mt-6">
       <div className="max-w-7xl mx-auto">
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">

@@ -23,6 +23,8 @@ import Logo from '@/components/logo';
 // import SidebarHoverToggle from '@/components/partials/sidebar/sidebar-hover-toggle';
 import { useMenuHoverConfig } from '@/hooks/use-menu-hover';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 
 
 export function MenuClassic({ }) {
@@ -56,7 +58,7 @@ export function MenuClassic({ }) {
     }, [scrollableNodeRef]);
 
     return (
-        <>
+        <div className="flex flex-col h-full">
             {isDesktop && (
                 <div className="flex items-center justify-between  px-4 py-4">
                     <Logo />
@@ -64,11 +66,7 @@ export function MenuClassic({ }) {
                 </div>
             )}
 
-
-
-
-            <ScrollArea className="[&>div>div[style]]:block!" dir={direction}>
-
+            <ScrollArea className="[&>div>div[style]]:block! flex-1" dir={direction}>
                 <nav className="mt-8 h-full w-full">
                     <ul className=" h-full flex flex-col min-h-[calc(100vh-48px-36px-16px-32px)] lg:min-h-[calc(100vh-32px-40px-32px)] items-start space-y-1 px-4">
                         {menuList?.map(({ groupLabel, menus }, index) => (
@@ -137,8 +135,46 @@ export function MenuClassic({ }) {
                         )} */}
                     </ul>
                 </nav>
-
             </ScrollArea>
-        </>
+            
+            {/* Contact Us Button - Hidden on mobile (xl and above only) */}
+            {isDesktop && (
+                <div className="px-4 pb-4 mt-auto">
+                    <TooltipProvider disableHoverableContent>
+                        <Tooltip delayDuration={100}>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    onClick={() => {
+                                        if (window.Tawk_API) {
+                                            window.Tawk_API.maximize();
+                                        }
+                                    }}
+                                    className={cn(
+                                        "w-full justify-start bg-white border-2 border-default text-default hover:bg-white/90",
+                                        {
+                                            "justify-center px-0": collapsed && !hovered,
+                                        }
+                                    )}
+                                    size={collapsed && !hovered ? "icon" : "default"}
+                                >
+                                    <Icon icon="heroicons:chat-bubble-left-right" 
+                                    className={cn("h-5 w-5", {
+                                        "me-2": !collapsed || hovered,
+                                    })} />
+                                    {(!collapsed || hovered) && (
+                                        <span className="text-sm font-medium text-default">Contact Us</span>
+                                    )}
+                                </Button>
+                            </TooltipTrigger>
+                            {collapsed && !hovered && (
+                                <TooltipContent side="right">
+                                    Contact Us
+                                </TooltipContent>
+                            )}
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
+            )}
+        </div>
     );
 }

@@ -79,7 +79,7 @@ const SubscriptionInfoStrip = () => {
   const planStyles = getPlanStyles(currentPlanName);
 
   return (
-    <div className={cn("w-full bg-gradient-to-r from-secondary/20 via-secondary/10 to-transparent backdrop-blur-sm xl:ms-[248px]", {
+    <div className={cn("bg-gradient-to-r from-secondary/20 via-secondary/10 to-transparent backdrop-blur-sm xl:ms-[248px]", {
       'xl:ms-[72px]': config.collapsed,
       'xl:ms-0': config.menuHidden || config.layout === "horizontal",
       'xl:ms-28': config.sidebar === 'compact',

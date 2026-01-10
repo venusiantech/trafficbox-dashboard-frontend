@@ -13,6 +13,7 @@ import Image from "next/image";
 import { useMobileMenuConfig } from "@/hooks/use-mobile-menu";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useConfig } from "@/hooks/use-config";
+import { cn } from "@/lib/utils";
 
 export function SheetMenu() {
     const [mobileMenuConfig, setMobileMenuConfig] = useMobileMenuConfig();
@@ -37,7 +38,24 @@ export function SheetMenu() {
                         <Image src="/logo/trafficboxes_logo_full.png" priority alt="logo" width={150} height={100} />
                     </Link>
                 </SheetHeader>
-                <MenuClassic />
+                <div className="flex-1 overflow-hidden">
+                    <MenuClassic />
+                </div>
+                {/* Contact Us Button for Mobile */}
+                <div className="px-4 pb-4 pt-4 border-t border-default-300">
+                    <Button
+                        onClick={() => {
+                            if (window.Tawk_API) {
+                                window.Tawk_API.maximize();
+                            }
+                            setMobileMenuConfig({ isOpen: false });
+                        }}
+                        className="w-full justify-start bg-white border border-default text-default hover:bg-white/90"
+                    >
+                        <Icon icon="heroicons:chat-bubble-left-right" className="h-5 w-5 me-2" />
+                        <span className="text-sm font-medium">Contact Us</span>
+                    </Button>
+                </div>
             </SheetContent>
         </Sheet>
     );

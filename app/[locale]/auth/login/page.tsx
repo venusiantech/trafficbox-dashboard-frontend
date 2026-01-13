@@ -1,10 +1,43 @@
+"use client";
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import LoginForm from "@/components/partials/auth/login-form";
 import Image from "next/image";
-import Social from "@/components/partials/auth/social";
 import Copyright from "@/components/partials/auth/copyright";
 import Logo from "@/components/partials/auth/logo";
+import { useAuthStore } from "@/context/authStore";
+import Loader from "@/components/loader";
+
 const Login = ({ params: { locale } }: { params: { locale: string } }) => {
+  const router = useRouter();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+
+  useEffect(() => {
+    // Check auth status on mount
+    checkAuth();
+  }, [checkAuth]);
+
+  useEffect(() => {
+    // Redirect if already authenticated
+    if (!isLoading && isAuthenticated) {
+      router.push(`/${locale}/dashboard/analytics`);
+    }
+  }, [isAuthenticated, isLoading, locale, router]);
+
+  // Show loading while checking auth
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  // Don't render login form if authenticated (will redirect)
+  if (isAuthenticated) {
+    return null;
+  }
+
   return (
     <>
       <div className="flex w-full items-center overflow-hidden min-h-dvh h-dvh basis-full">

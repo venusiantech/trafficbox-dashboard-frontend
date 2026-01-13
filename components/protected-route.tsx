@@ -1,8 +1,8 @@
 "use client";
 
 import { useAuthStore } from "@/context/authStore";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import Loader from "@/components/loader";
 
 interface ProtectedRouteProps {
@@ -12,17 +12,32 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isLoading = useAuthStore((state) => state.isLoading);
+  const checkAuth = useAuthStore((state) => state.checkAuth);
   const router = useRouter();
+  const pathname = usePathname();
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
+
+  // Check auth on mount and when pathname changes (e.g., after redirects)
+  useEffect(() => {
+    const verifyAuth = async () => {
+      await checkAuth();
+      setHasCheckedAuth(true);
+    };
+    
+    verifyAuth();
+  }, [checkAuth, pathname]);
 
   useEffect(() => {
-    // If not loading and not authenticated, redirect to login
-    if (!isLoading && !isAuthenticated) {
-      router.push("/en/auth/login");
+    // Only redirect if we've checked auth and user is not authenticated
+    if (hasCheckedAuth && !isLoading && !isAuthenticated) {
+      // Get locale from pathname or default to 'en'
+      const locale = pathname?.split('/')[1] || 'en';
+      router.push(`/${locale}/auth/login`);
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, hasCheckedAuth, router, pathname]);
 
   // Show loading indicator while checking authentication
-  if (isLoading) {
+  if (isLoading || !hasCheckedAuth) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader />

@@ -173,8 +173,8 @@ export default function SubscriptionsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             planName,
-            successUrl: `${window.location.origin}${window.location.pathname}?upgrade=success`,
-            cancelUrl: `${window.location.origin}${window.location.pathname}?upgrade=cancel`,
+            successUrl: `https://app.trafficboxes.com/en/dashboard/subscription/success`,
+            cancelUrl: `https://app.trafficboxes.com/en/dashboard/subscription/cancel`,
           }),
         });
 
@@ -334,7 +334,7 @@ export default function SubscriptionsPage() {
       starter: "info",
       growth: "success",
       business: "warning",
-      premium: "destructive",
+      custom: "destructive",
     };
     return colors[planName] || "default";
   };
@@ -361,7 +361,7 @@ export default function SubscriptionsPage() {
         border: "2px solid #FFD700",
         text: "#1e293b"
       },
-      premium: {
+      custom: {
         bg: "#5B21B6", // Dark Purple (like logo)
         border: "2px solid #5B21B6",
         text: "#ffffff"
@@ -376,13 +376,13 @@ export default function SubscriptionsPage() {
       starter: "linear-gradient(135deg, rgba(184, 115, 51, 0.12) 0%, rgba(184, 115, 51, 0.03) 100%)",
       growth: "linear-gradient(135deg, rgba(192, 192, 192, 0.15) 0%, rgba(192, 192, 192, 0.04) 100%)",
       business: "linear-gradient(135deg, rgba(255, 215, 0, 0.18) 0%, rgba(255, 215, 0, 0.04) 100%)",
-      premium: "linear-gradient(135deg, rgba(91, 33, 182, 0.20) 0%, rgba(91, 33, 182, 0.05) 100%)",
+      custom: "linear-gradient(135deg, rgba(91, 33, 182, 0.20) 0%, rgba(91, 33, 182, 0.05) 100%)",
     };
     return gradients[planName] || gradients.free;
   };
 
   const isPlanHigher = (planA: string, planB: string) => {
-    const hierarchy = ["free", "starter", "growth", "business", "premium"];
+    const hierarchy = ["free", "starter", "growth", "business", "custom"];
     return hierarchy.indexOf(planA) > hierarchy.indexOf(planB);
   };
 
@@ -534,6 +534,7 @@ export default function SubscriptionsPage() {
             {plans.map((plan) => {
               const isCurrentPlan = plan.planName === subscription.planName;
               const canUpgrade = isPlanHigher(plan.planName, subscription.planName);
+              const isCustom = plan.planName === "custom";
 
               return (
                 <Card
@@ -550,8 +551,14 @@ export default function SubscriptionsPage() {
                       {plan.planName}
                     </CardTitle>
                     <div className="mt-2">
-                      <span className="text-3xl font-bold">{formatCurrency(plan.price)}</span>
-                      {plan.price > 0 && <span className="text-muted-foreground">/month</span>}
+                      {isCustom ? (
+                        <span className="text-3xl font-bold">$-.--</span>
+                      ) : (
+                        <>
+                          <span className="text-3xl font-bold">{formatCurrency(plan.price)}</span>
+                          {plan.price > 0 && <span className="text-muted-foreground">/month</span>}
+                        </>
+                      )}
                     </div>
                     <CardDescription className="text-xs mt-2">{plan.description}</CardDescription>
                   </CardHeader>
@@ -569,7 +576,17 @@ export default function SubscriptionsPage() {
                     </div>
 
                     <div className="pt-4">
-                      {isCurrentPlan ? (
+                      {isCustom ? (
+                        <Button 
+                          className="w-full gap-2"
+                          asChild
+                        >
+                          <a href="/subscription/custom-contact" target="_blank" rel="noopener noreferrer">
+                            <Icon icon="heroicons:envelope" className="w-4 h-4" />
+                            Contact Us
+                          </a>
+                        </Button>
+                      ) : isCurrentPlan ? (
                         <Button className="w-full" disabled>
                           Current Plan
                         </Button>

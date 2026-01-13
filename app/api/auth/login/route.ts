@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
       const responseData = { ...data };
       
       // Set the token in an HTTP-only cookie
+      // Using 'lax' instead of 'strict' to allow cookies on redirects from payment providers (Stripe)
       cookies().set({
         name: 'token',
         value: data.token,
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
         path: '/',
         secure: process.env.NODE_ENV === 'production',
         maxAge: 60 * 60 * 24 * 7, // 1 week
-        sameSite: 'strict'
+        sameSite: 'lax'
       });
     }
     

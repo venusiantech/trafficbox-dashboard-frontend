@@ -7,8 +7,12 @@ export default async function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
   const path = request.nextUrl.pathname;
   
-  // Get the locale from the path or use default
-  const defaultLocale = request.headers.get('dashcode-locale') || 'en';
+  // Get the locale from the pathname (more reliable for external redirects like Stripe)
+  // Path format: /{locale}/... or just /
+  const pathSegments = path.split('/').filter(Boolean);
+  const defaultLocale = pathSegments[0] && locales.includes(pathSegments[0] as any) 
+    ? pathSegments[0] 
+    : request.headers.get('dashcode-locale') || 'en';
   
   // Handle root path redirect based on authentication
   if (path === '/') {

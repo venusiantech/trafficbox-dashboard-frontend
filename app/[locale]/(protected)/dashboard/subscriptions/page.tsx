@@ -18,6 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import CustomPlanRequestDialog from "@/components/custom-plan-request-dialog";
 
 interface Subscription {
   planName: string;
@@ -67,6 +68,7 @@ export default function SubscriptionsPage() {
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [upgradingToPlan, setUpgradingToPlan] = useState<string | null>(null);
+  const [showCustomPlanDialog, setShowCustomPlanDialog] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -564,27 +566,29 @@ export default function SubscriptionsPage() {
                   </CardHeader>
 
                   <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Icon icon="heroicons:check" className="w-4 h-4 text-success" />
-                        <span>{plan.visitsIncluded.toLocaleString()} visits/month</span>
+                    {isCustom ? (
+                      <><br/></>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Icon icon="heroicons:check" className="w-4 h-4 text-success" />
+                          <span>{plan.visitsIncluded.toLocaleString()} visits/month</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Icon icon="heroicons:check" className="w-4 h-4 text-success" />
+                          <span>{plan.campaignLimit} campaigns</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Icon icon="heroicons:check" className="w-4 h-4 text-success" />
-                        <span>{plan.campaignLimit} campaigns</span>
-                      </div>
-                    </div>
+                    )}
 
                     <div className="pt-4">
                       {isCustom ? (
                         <Button 
                           className="w-full gap-2"
-                          asChild
+                          onClick={() => setShowCustomPlanDialog(true)}
                         >
-                          <a href="/subscription/custom-contact" target="_blank" rel="noopener noreferrer">
-                            <Icon icon="heroicons:envelope" className="w-4 h-4" />
-                            Contact Us
-                          </a>
+                          <Icon icon="heroicons:envelope" className="w-4 h-4" />
+                          Connect With Us
                         </Button>
                       ) : isCurrentPlan ? (
                         <Button className="w-full" disabled>
@@ -745,6 +749,15 @@ export default function SubscriptionsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Custom Plan Request Dialog */}
+      <CustomPlanRequestDialog
+        open={showCustomPlanDialog}
+        onOpenChange={setShowCustomPlanDialog}
+        onSuccess={() => {
+          toast.success("Your request has been submitted! We'll contact you soon.");
+        }}
+      />
     </div>
   );
 }

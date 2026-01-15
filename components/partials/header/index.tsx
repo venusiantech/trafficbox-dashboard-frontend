@@ -3,7 +3,7 @@
 import React from 'react'
 import HeaderContent from './header-content'
 import ProfileInfo from './profile-info'
-// import Notifications from './notifications'
+import Notifications from './notifications'
 // import Messages from "./messages"
 import ThemeSwitcher from './theme-switcher'
 import { SheetMenu } from '@/components/partials/sidebar/menu/sheet-menu'
@@ -22,7 +22,7 @@ const DashCodeHeader = () => {
                     {/* <LocalSwitcher /> */}
                     {/* <ThemeSwitcher /> */}
                     {/* <Messages /> */}
-                    {/* <Notifications /> */}
+                    <Notifications />
                     <ProfileInfo />
                     <SheetMenu />
                 </div>

@@ -9,6 +9,7 @@ export type NotificationType =
   | 'custom_plan_request_submitted'
   | 'custom_plan_request_approved'
   | 'custom_plan_request_rejected'
+  | 'custom_plan_assigned_payment_pending'
   | 'subscription_upgraded'
   | 'subscription_cancelled'
   | 'campaign_created'
@@ -23,6 +24,17 @@ export type Notification = {
   message: string;
   relatedId?: string;
   relatedModel?: string;
+  actionUrl?: string;
+  actionLabel?: string;
+  metadata?: {
+    amount?: number;
+    currency?: string;
+    visitsIncluded?: number;
+    campaignLimit?: number;
+    durationDays?: number;
+    checkoutSessionId?: string;
+    paymentLinkId?: string;
+  };
   isRead: boolean;
   readAt?: string;
   createdAt: string;

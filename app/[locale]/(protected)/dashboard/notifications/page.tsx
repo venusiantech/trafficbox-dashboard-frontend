@@ -64,6 +64,11 @@ export default function NotificationsPage() {
         bgColor: " dark:bg-red-900/30", 
         iconColor: "text-red-600 dark:text-red-400" 
       },
+      custom_plan_assigned_payment_pending: {
+        icon: "heroicons:credit-card",
+        bgColor: " dark:bg-yellow-900/30",
+        iconColor: "text-yellow-600 dark:text-yellow-400"
+      },
       subscription_upgraded: { 
         icon: "heroicons:arrow-trending-up", 
         bgColor: " dark:bg-emerald-900/30", 
@@ -170,13 +175,21 @@ export default function NotificationsPage() {
                           </span>
                         </div>
                         
-                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
+                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed whitespace-pre-line">
                           {notification.message}
                         </p>
                         
-                        {/* <Badge variant="secondary" className="text-xs font-normal capitalize">
-                          {notification.type.replace(/_/g, " ")}
-                        </Badge> */}
+                        {/* Action Button (e.g., Pay Now) */}
+                        {notification.actionUrl && notification.actionLabel && (
+                          <Button
+                            onClick={() => window.open(notification.actionUrl, '_blank')}
+                            className="gap-2 mt-2"
+                            size="sm"
+                          >
+                            <Icon icon="heroicons:arrow-top-right-on-square" className="w-4 h-4" />
+                            {notification.actionLabel}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>

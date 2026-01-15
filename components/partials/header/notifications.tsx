@@ -58,20 +58,21 @@ const Notifications = () => {
         }
     };
 
-    const getNotificationIcon = (type: string) => {
-        const iconMap: { [key: string]: string } = {
-            contact_us_submitted: "heroicons:envelope",
-            custom_plan_request_submitted: "heroicons:document-text",
-            custom_plan_request_approved: "heroicons:check-circle",
-            custom_plan_request_rejected: "heroicons:x-circle",
-            subscription_upgraded: "heroicons:arrow-trending-up",
-            subscription_cancelled: "heroicons:x-mark",
-            campaign_created: "heroicons:sparkles",
-            campaign_paused: "heroicons:pause",
-            campaign_completed: "heroicons:check-badge",
-        };
-        return iconMap[type] || "heroicons:bell";
+  const getNotificationIcon = (type: string) => {
+    const iconMap: { [key: string]: string } = {
+      contact_us_submitted: "heroicons:envelope",
+      custom_plan_request_submitted: "heroicons:document-text",
+      custom_plan_request_approved: "heroicons:check-circle",
+      custom_plan_request_rejected: "heroicons:x-circle",
+      custom_plan_assigned_payment_pending: "heroicons:credit-card",
+      subscription_upgraded: "heroicons:arrow-trending-up",
+      subscription_cancelled: "heroicons:x-mark",
+      campaign_created: "heroicons:sparkles",
+      campaign_paused: "heroicons:pause",
+      campaign_completed: "heroicons:check-badge",
     };
+    return iconMap[type] || "heroicons:bell";
+  };
 
     const formatDate = (dateString: string) => {
         try {
@@ -153,9 +154,21 @@ const Notifications = () => {
                                             <div className="text-sm text-default-700 dark:group-hover:text-default-900 font-medium line-clamp-1">
                                                 {item.title}
                                             </div>
-                                            <div className="text-xs text-default-600 dark:group-hover:text-default-700 font-normal line-clamp-2">
+                                            <div className="text-xs text-default-600 dark:group-hover:text-default-700 font-normal line-clamp-2 whitespace-pre-line">
                                                 {item.message}
                                             </div>
+                                            {item.actionUrl && item.actionLabel && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        window.open(item.actionUrl, '_blank');
+                                                    }}
+                                                    className="text-xs text-primary hover:underline text-left flex items-center gap-1 mt-1"
+                                                >
+                                                    <Icon icon="heroicons:arrow-top-right-on-square" className="w-3 h-3" />
+                                                    {item.actionLabel}
+                                                </button>
+                                            )}
                                             <div className="text-default-400 dark:group-hover:text-default-500 text-xs">
                                                 {formatDate(item.createdAt)}
                                             </div>

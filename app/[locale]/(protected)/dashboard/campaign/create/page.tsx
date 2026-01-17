@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {PlusCircle, Info } from "lucide-react";
+import {PlusCircle, Info, CheckCircle2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "@/components/ui/use-toast";
 import { useTranslations } from "next-intl";
@@ -32,20 +32,58 @@ export default function CreateCampaignPage() {
     speed: 200
   });
 
-  // Automatically set target URLs to match Main URL
+  // Domain only state (what user types)
+  const [domain, setDomain] = useState("");
+  const [isUrlValid, setIsUrlValid] = useState(false);
+
+  // Automatically build full URL from domain
   useEffect(() => {
-    if (formData.url) {
+    if (domain) {
+      // Clean domain - remove any https://, http://, and trailing/leading slashes
+      let cleanDomain = domain
+        .replace(/^https?:\/\//, '')
+        .replace(/^\/+|\/+$/g, '')
+        .trim();
+      
+      // Build full URL
+      const fullUrl = cleanDomain ? `https://${cleanDomain}/` : "";
+      
+      // Validate
+      let valid = false;
+      if (cleanDomain && cleanDomain.includes('.')) {
+        try {
+          new URL(fullUrl);
+          valid = true;
+        } catch (error) {
+          valid = false;
+        }
+      }
+      
+      setIsUrlValid(valid);
       setFormData((prev) => ({
         ...prev,
-        urls: [formData.url]
+        url: fullUrl,
+        urls: [fullUrl]
+      }));
+    } else {
+      setIsUrlValid(false);
+      setFormData((prev) => ({
+        ...prev,
+        url: "",
+        urls: [""]
       }));
     }
-  }, [formData.url]);
+  }, [domain]);
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle domain input
+  const handleDomainChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDomain(e.target.value);
   };
 
   // Handle slider changes
@@ -77,10 +115,36 @@ export default function CreateCampaignPage() {
         return;
       }
 
-      // Create campaign with Main URL as target URL
+      // Validate URL format
+      let finalUrl = formData.url.trim();
+      
+      // Ensure URL has protocol
+      if (!finalUrl.startsWith("http://") && !finalUrl.startsWith("https://")) {
+        finalUrl = "https://" + finalUrl;
+      }
+
+      // Validate URL structure
+      try {
+        new URL(finalUrl);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Please enter a valid URL (e.g., https://example.com/)",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Ensure URL ends with /
+      if (!finalUrl.endsWith("/")) {
+        finalUrl = finalUrl + "/";
+      }
+
+      // Create campaign with formatted URL
       const campaign = await createCampaign({
         ...formData,
-        urls: [formData.url]
+        url: finalUrl,
+        urls: [finalUrl]
       });
 
       toast({
@@ -161,18 +225,34 @@ export default function CreateCampaignPage() {
                       <h6 className="text-sm font-medium">
                         Main URL
                       </h6>
-                      <InfoTooltip content="The primary URL for your campaign. This will also be used as the target URL." />
+                      <InfoTooltip content="Just enter your domain name (e.g., example.com). We'll automatically add https:// and trailing /." />
                     </div>
-                    <Input
-                      id="url"
-                      name="url"
-                      type="url"
-                      value={formData.url}
-                      onChange={handleChange}
-                      placeholder="https://example.com"
-                      className="h-9 font-mono text-sm"
-                      required
-                    />
+                    <div className="relative flex items-center border rounded-md overflow-hidden">
+                      <span className="px-3 py-2 bg-muted text-muted-foreground text-sm font-mono h-9 flex items-center border-r">
+                        https://
+                      </span>
+                      <Input
+                        id="domain"
+                        name="domain"
+                        type="text"
+                        value={domain}
+                        onChange={handleDomainChange}
+                        placeholder="example.com"
+                        className="h-9 font-mono text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0 flex-1"
+                        required
+                      />
+                      <span className="px-3 py-2 bg-muted text-muted-foreground text-sm font-mono h-9 flex items-center border-l">
+                        /
+                      </span>
+                      {isUrlValid && (
+                        <div className="absolute right-12 top-1/2 -translate-y-1/2">
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Just enter your domain (e.g., example.com). We'll add https:// and / automatically.
+                    </p>
                   </div>
 
                   {/* Page Views per Day */}

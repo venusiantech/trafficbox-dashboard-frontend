@@ -66,6 +66,26 @@ export function getMenuList(pathname: string, t: any): Group[] {
         }
       ],
     },
+    {
+      groupLabel: "SEO Analysis",
+      id: "seo",
+      menus: [
+        {
+          id: "seo-create",
+          href: "/dashboard/seo/create",
+          label: "Create SEO Report",
+          active: pathname === "/dashboard/seo/create",
+          icon: "heroicons:document-magnifying-glass",
+        },
+        {
+          id: "seo-list",
+          href: "/dashboard/seo/list",
+          label: "SEO Reports",
+          active: pathname === "/dashboard/seo/list",
+          icon: "heroicons:chart-bar",
+        }
+      ],
+    },
   ];
 }
 export function getHorizontalMenuList(pathname: string, t: any): Group[] {
@@ -100,6 +120,26 @@ export function getHorizontalMenuList(pathname: string, t: any): Group[] {
           label: t("campaigns"),
           active: pathname === "/dashboard/campaign/list",
           icon: "heroicons:list-bullet",
+        }
+      ],
+    },
+    {
+      groupLabel: "SEO Analysis",
+      id: "seo",
+      menus: [
+        {
+          id: "seo-create",
+          href: "/dashboard/seo/create",
+          label: "Create SEO Report",
+          active: pathname === "/dashboard/seo/create",
+          icon: "heroicons:document-magnifying-glass",
+        },
+        {
+          id: "seo-list",
+          href: "/dashboard/seo/list",
+          label: "SEO Reports",
+          active: pathname === "/dashboard/seo/list",
+          icon: "heroicons:chart-bar",
         }
       ],
     },

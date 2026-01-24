@@ -1,22 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Icon } from "@/components/ui/icon";
 import { CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
 import PageTitle from "@/components/page-title";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function CreateSEOAnalysisPage() {
-  const router = useRouter();
+  const { handleCreateAnalysis, isCreating, navigateToList } = useSEO();
   const [domain, setDomain] = useState("");
   const [url, setUrl] = useState("");
   const [isUrlValid, setIsUrlValid] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   // Automatically build full URL from domain
   useEffect(() => {
@@ -57,37 +55,13 @@ export default function CreateSEOAnalysisPage() {
     e.preventDefault();
 
     if (!url || !isUrlValid) {
-      toast.error("Please enter a valid domain");
       return;
     }
 
     try {
-      setIsLoading(true);
-
-      const response = await fetch("/api/seo/analysis", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create SEO analysis");
-      }
-
-      toast.success("SEO Analysis created successfully!");
-      
-      // Redirect to list page
-      const locale = window.location.pathname.split('/')[1];
-      router.push(`/${locale}/dashboard/seo/list`);
-    } catch (err: any) {
-      console.error("Error creating SEO analysis:", err);
-      toast.error(err.message || "Failed to create SEO analysis");
-    } finally {
-      setIsLoading(false);
+      await handleCreateAnalysis(url);
+    } catch (err) {
+      // Error is handled in the hook
     }
   };
 
@@ -118,7 +92,7 @@ export default function CreateSEOAnalysisPage() {
                   onChange={handleDomainChange}
                   placeholder="example.com"
                   className="h-10 font-mono text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0 flex-1"
-                  disabled={isLoading}
+                  disabled={isCreating}
                   required
                 />
                 <span className="px-3 py-2 bg-muted text-muted-foreground text-sm font-mono h-10 flex items-center border-l">
@@ -155,10 +129,10 @@ export default function CreateSEOAnalysisPage() {
             <div className="flex gap-3">
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isCreating}
                 className="gap-2"
               >
-                {isLoading ? (
+                {isCreating ? (
                   <>
                     <Icon icon="heroicons:arrow-path" className="w-4 h-4 animate-spin" />
                     Analyzing...
@@ -173,11 +147,8 @@ export default function CreateSEOAnalysisPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => {
-                  const locale = window.location.pathname.split('/')[1];
-                  router.push(`/${locale}/dashboard/seo/list`);
-                }}
-                disabled={isLoading}
+                onClick={navigateToList}
+                disabled={isCreating}
               >
                 Cancel
               </Button>

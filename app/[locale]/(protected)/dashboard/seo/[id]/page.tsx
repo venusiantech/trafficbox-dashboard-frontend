@@ -166,92 +166,116 @@ export default function SEOAnalysisPage() {
   return (
     <div className="mx-auto py-6 space-y-6">
       {/* 1. Overall Score & Summary */}
-      <OverallScoreCard
-        totalScore={fullReportData.overall_score.total}
-        grade={currentAnalysis.grade}
-        scoreStatus={currentAnalysis.scoreStatus}
-        url={currentAnalysis.url}
-        processingTime={currentAnalysis.processingTime}
-        createdAt={currentAnalysis.createdAt}
-        analysisId={currentAnalysis.analysisId}
-        scores={currentAnalysis.scores}
-        onDownloadPDF={handleDownloadPDF}
-        isGeneratingPDF={isGeneratingPDF}
-      />
+      <div data-pdf-component="overall-score">
+        <OverallScoreCard
+          totalScore={fullReportData.overall_score.total}
+          grade={currentAnalysis.grade}
+          scoreStatus={currentAnalysis.scoreStatus}
+          url={currentAnalysis.url}
+          processingTime={currentAnalysis.processingTime}
+          createdAt={currentAnalysis.createdAt}
+          analysisId={currentAnalysis.analysisId}
+          scores={currentAnalysis.scores}
+          onDownloadPDF={handleDownloadPDF}
+          isGeneratingPDF={isGeneratingPDF}
+        />
+      </div>
 
       {/* 3. Lighthouse Scores */}
-      <LighthouseScores lighthouseScores={currentAnalysis.lighthouseScores} />
+      <div data-pdf-component="lighthouse-scores">
+        <LighthouseScores lighthouseScores={currentAnalysis.lighthouseScores} />
+      </div>
 
       <SectionDivider title="Performance" />
 
       {/* 4. Core Web Vitals */}
-      <CoreWebVitals metrics={currentAnalysis.metrics} />
+      <div data-pdf-component="core-web-vitals">
+        <CoreWebVitals metrics={currentAnalysis.metrics} />
+      </div>
 
       {/* 5. Performance Details (file sizes, resources, etc.) */}
-      <PerformanceDetails 
-        fileSizes={currentAnalysis.fileSizes}
-        performance={fullReportData.performance}
-      />
+      <div data-pdf-component="performance-details">
+        <PerformanceDetails 
+          fileSizes={currentAnalysis.fileSizes}
+          performance={fullReportData.performance}
+        />
+      </div>
 
       <SectionDivider title="Content & SEO" />
 
       {/* 6. Meta Information */}
-      <MetaInformation metaInformation={fullReportData.meta_information} />
+      <div data-pdf-component="meta-information">
+        <MetaInformation metaInformation={fullReportData.meta_information} />
+      </div>
 
       {/* 7. Content Analysis & Headings */}
-      <ContentAnalysis
-        contentAnalysis={fullReportData.content_analysis}
-        headings={fullReportData.headings}
-      />
+      <div data-pdf-component="content-analysis">
+        <ContentAnalysis
+          contentAnalysis={fullReportData.content_analysis}
+          headings={fullReportData.headings}
+        />
+      </div>
 
       {/* 8. Links & Images */}
-      <LinksImages links={fullReportData.links} images={fullReportData.images} />
+      <div data-pdf-component="links-images">
+        <LinksImages links={fullReportData.links} images={fullReportData.images} />
+      </div>
 
       <SectionDivider title="Technical" />
 
       {/* 9. Technical SEO & URL Analysis */}
-      <TechnicalSEO
-        technicalSEO={fullReportData.technical_seo}
-        urlAnalysis={fullReportData.url_analysis}
-      />
+      <div data-pdf-component="technical-seo">
+        <TechnicalSEO
+          technicalSEO={fullReportData.technical_seo}
+          urlAnalysis={fullReportData.url_analysis}
+        />
+      </div>
 
       {/* 10. Security & Accessibility */}
-      <SecurityAccessibility
-        security={fullReportData.security}
-        accessibility={fullReportData.accessibility}
-      />
+      <div data-pdf-component="security-accessibility">
+        <SecurityAccessibility
+          security={fullReportData.security}
+          accessibility={fullReportData.accessibility}
+        />
+      </div>
 
       {/* 11. Mobile Analysis */}
-      <MobileAnalysis mobile={fullReportData.mobile} />
+      <div data-pdf-component="mobile-analysis">
+        <MobileAnalysis mobile={fullReportData.mobile} />
+      </div>
 
       <SectionDivider title="Screenshots" />
 
       {/* 12. Screenshots */}
-      <Screenshots
-        finalScreenshot={
-          fullReportData.performance?.lighthouse?.core_web_vitals?.["final-screenshot"]?.details
-            ?.data
-        }
-        screenshotTimeline={
-          fullReportData.performance?.lighthouse?.core_web_vitals?.["screenshot-thumbnails"]
-            ?.details?.items?.map((item: any) => ({
-              timing: item.timing,
-              timestamp: item.timestamp,
-              data: item.data,
-            })) || []
-        }
-        // Fallback to old structure
-        lighthouseScreenshot={currentAnalysis.data.lighthouseScreenshot}
-        additionalImages={currentAnalysis.data.additionalImages}
-      />
+      <div data-pdf-component="screenshots">
+        <Screenshots
+          finalScreenshot={
+            fullReportData.performance?.lighthouse?.core_web_vitals?.["final-screenshot"]?.details
+              ?.data
+          }
+          screenshotTimeline={
+            fullReportData.performance?.lighthouse?.core_web_vitals?.["screenshot-thumbnails"]
+              ?.details?.items?.map((item: any) => ({
+                timing: item.timing,
+                timestamp: item.timestamp,
+                data: item.data,
+              })) || []
+          }
+          // Fallback to old structure
+          lighthouseScreenshot={currentAnalysis.data.lighthouseScreenshot}
+          additionalImages={currentAnalysis.data.additionalImages}
+        />
+      </div>
 
       <SectionDivider title="Recommendations" />
 
       {/* 13. Recommendations & Issues */}
-      <Recommendations
-        recommendations={fullReportData.recommendations}
-        issues={fullReportData.issues}
-      />
+      <div data-pdf-component="recommendations">
+        <Recommendations
+          recommendations={fullReportData.recommendations}
+          issues={fullReportData.issues}
+        />
+      </div>
     </div>
   );
 }

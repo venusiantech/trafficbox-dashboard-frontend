@@ -1,48 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { LighthouseScores as LighthouseScoresType } from "./types";
-import { getScoreTextColor, getScoreStrokeColor } from "./seo-utils";
+import { getScoreTextColor } from "./seo-utils";
 
 interface LighthouseScoresProps {
   lighthouseScores: LighthouseScoresType;
-}
-
-function ScoreRing({ score, label }: { score: number | null; label: string }) {
-  if (score === null) return null;
-
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="relative w-20 h-20">
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-          <circle
-            cx="50"
-            cy="50"
-            r="40"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="8"
-            className="text-muted/20"
-          />
-          <circle
-            cx="50"
-            cy="50"
-            r="40"
-            fill="none"
-            strokeWidth="8"
-            strokeDasharray={`${(score / 100) * 251} 251`}
-            strokeLinecap="round"
-            className={getScoreStrokeColor(score)}
-          />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className={cn("text-xl font-bold", getScoreTextColor(score))}>{score}</span>
-        </div>
-      </div>
-      <span className="text-sm font-medium text-center">{label}</span>
-    </div>
-  );
 }
 
 export function LighthouseScores({ lighthouseScores }: LighthouseScoresProps) {
@@ -52,32 +16,30 @@ export function LighthouseScores({ lighthouseScores }: LighthouseScoresProps) {
     { score: lighthouseScores.bestPractices, label: "Best Practices" },
     { score: lighthouseScores.seo, label: "SEO" },
     { score: lighthouseScores.pwa, label: "PWA" },
-  ].filter((item) => item.score !== null);
+  ].filter((item): item is { score: number; label: string } => item.score !== null);
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-semibold">Lighthouse Scores</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap justify-center gap-6 md:gap-10">
-          {scores.map(({ score, label }) => (
-            <ScoreRing key={label} score={score} label={label} />
-          ))}
+    <Card className="overflow-hidden">
+      <CardContent className="p-6 sm:p-8">
+        <div className="flex items-start gap-4 mb-6">
+          <div className="w-1 h-8 bg-purple-600 rounded-full" />
+          <h2 className="text-2xl font-semibold text-gray-800">Lighthouse Scores</h2>
         </div>
-        <div className="flex justify-center gap-6 mt-4 text-xs">
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-500" />
-            <span>0-49</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-amber-500" />
-            <span>50-89</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-emerald-500" />
-            <span>90-100</span>
-          </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {scores.map(({ score, label }) => (
+            <div
+              key={label}
+              className="p-4 bg-gray-50 border border-gray-200 rounded-lg"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">{label}</span>
+                <span className={cn("text-lg font-bold", getScoreTextColor(score))}>
+                  {score}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

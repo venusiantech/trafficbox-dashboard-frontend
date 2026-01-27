@@ -10,172 +10,145 @@ interface TechnicalSEOProps {
   urlAnalysis: URLAnalysis;
 }
 
+function MetricRow({ label, value, valueColor }: { label: string; value: React.ReactNode; valueColor?: string }) {
+  return (
+    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+      <span className="text-sm text-slate-700">{label}</span>
+      <span className={cn("text-sm font-medium", valueColor)}>{value}</span>
+    </div>
+  );
+}
+
+function YesNoBadge({ value, warn = false }: { value: boolean; warn?: boolean }) {
+  if (warn && !value) {
+    return (
+      <Badge className="text-xs font-medium bg-amber-500 text-white">
+        No
+      </Badge>
+    );
+  }
+  return (
+    <Badge
+      className={cn(
+        "text-xs font-medium",
+        value
+          ? "bg-emerald-500 text-white"
+          : "bg-red-500 text-white"
+      )}
+    >
+      {value ? "Yes" : "No"}
+    </Badge>
+  );
+}
+
 export function TechnicalSEO({ technicalSEO, urlAnalysis }: TechnicalSEOProps) {
   const { ssl, structured_data, status_code, redirects, score } = technicalSEO;
 
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-emerald-500";
+    if (score >= 60) return "text-amber-500";
+    return "text-red-500";
+  };
+
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">Technical SEO</CardTitle>
-          <Badge
-            className={cn(
-              "border",
-              score >= 80
-                ? "bg-emerald-500/10 text-emerald-500"
-                : score >= 60
-                ? "bg-amber-500/10 text-amber-500"
-                : "bg-red-500/10 text-red-500"
-            )}
-          >
-            Score: {score}%
-          </Badge>
-        </div>
+    <Card className="border-slate-200">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-xl font-semibold text-slate-900">Technical SEO</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-            <div
-              className={cn(
-                "w-3 h-3 rounded-full",
-                ssl.enabled ? "bg-emerald-500" : "bg-red-500"
-              )}
+      <CardContent>
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Left Column - Technical SEO Metrics */}
+          <div className="space-y-3">
+            <MetricRow
+              label="SSL/HTTPS"
+              value={<YesNoBadge value={ssl.enabled} />}
             />
-            <div>
-              <p className="text-sm font-medium">SSL/HTTPS</p>
-              <p className="text-xs text-muted-foreground">
-                {ssl.enabled ? "Enabled" : "Disabled"}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-            <Badge
-              className={cn(
-                "border",
-                status_code === 200
-                  ? "bg-emerald-500/10 text-emerald-500"
-                  : "bg-red-500/10 text-red-500"
-              )}
-            >
-              {status_code}
-            </Badge>
-            <div>
-              <p className="text-sm font-medium">Status Code</p>
-              <p className="text-xs text-muted-foreground">HTTP Response</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-            <div
-              className={cn(
-                "w-3 h-3 rounded-full",
-                redirects === 0 ? "bg-emerald-500" : "bg-amber-500"
-              )}
+            <MetricRow
+              label="Status Code"
+              value={
+                <span className={cn("text-sm font-medium", status_code === 200 ? "text-emerald-500" : "text-red-500")}>
+                  {status_code}
+                </span>
+              }
             />
-            <div>
-              <p className="text-sm font-medium">{redirects} Redirects</p>
-              <p className="text-xs text-muted-foreground">Redirect Chain</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-            <div
-              className={cn(
-                "w-3 h-3 rounded-full",
-                structured_data.exists ? "bg-emerald-500" : "bg-amber-500"
-              )}
+            <MetricRow
+              label="Redirects"
+              value={<span className="text-sm text-slate-700">{redirects}</span>}
             />
-            <div>
-              <p className="text-sm font-medium">Structured Data</p>
-              <p className="text-xs text-muted-foreground">
-                {structured_data.count} types found
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {structured_data.types.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Structured Data Types</p>
-            <div className="flex flex-wrap gap-2">
-              {structured_data.types.map((type, i) => (
-                <Badge key={i} color="secondary">
-                  {type}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-3">
-          <p className="text-sm font-medium">URL Analysis</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="p-3 bg-muted/50 rounded-lg text-center">
-              <p className="text-xl font-bold">{urlAnalysis.length}</p>
-              <p className="text-xs text-muted-foreground">Characters</p>
-            </div>
-            <div className="p-3 bg-muted/50 rounded-lg text-center">
-              <p className="text-xl font-bold">{urlAnalysis.depth}</p>
-              <p className="text-xs text-muted-foreground">Depth Level</p>
-            </div>
-            <div className="p-3 bg-muted/50 rounded-lg text-center">
-              <div
-                className={cn(
-                  "w-3 h-3 rounded-full mx-auto mb-1",
-                  urlAnalysis.is_readable ? "bg-emerald-500" : "bg-red-500"
-                )}
+            <MetricRow
+              label="Structured Data"
+              value={<YesNoBadge value={structured_data.exists} />}
+            />
+            {structured_data.exists && structured_data.count > 0 && (
+              <MetricRow
+                label="Structured Data Types"
+                value={<span className="text-sm text-slate-700">{structured_data.count}</span>}
               />
-              <p className="text-xs text-muted-foreground">Readable</p>
-            </div>
-            <div className="p-3 bg-muted/50 rounded-lg text-center">
-              <div
-                className={cn(
-                  "w-3 h-3 rounded-full mx-auto mb-1",
-                  urlAnalysis.has_keywords ? "bg-emerald-500" : "bg-amber-500"
-                )}
-              />
-              <p className="text-xs text-muted-foreground">Has Keywords</p>
-            </div>
+            )}
+            <MetricRow
+              label="URL Length"
+              value={<span className="text-sm text-slate-700">{urlAnalysis.length}</span>}
+            />
+            <MetricRow
+              label="URL Depth"
+              value={<span className="text-sm text-slate-700">{urlAnalysis.depth}</span>}
+            />
+            <MetricRow
+              label="Technical SEO Score"
+              value={<span className={cn("text-sm font-medium", getScoreColor(score))}>{score}</span>}
+            />
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Badge
-              className={cn(
-                "border",
-                urlAnalysis.uses_hyphens
-                  ? "bg-emerald-500/10 text-emerald-500"
-                  : "bg-slate-500/10"
-              )}
-            >
-              {urlAnalysis.uses_hyphens ? "✓" : "✗"} Uses Hyphens
-            </Badge>
-            <Badge
-              className={cn(
-                "border",
-                !urlAnalysis.uses_underscores
-                  ? "bg-emerald-500/10 text-emerald-500"
-                  : "bg-amber-500/10 text-amber-500"
-              )}
-            >
-              {!urlAnalysis.uses_underscores ? "✓" : "✗"} No Underscores
-            </Badge>
-            <Badge
-              className={cn(
-                "border",
-                !urlAnalysis.has_parameters
-                  ? "bg-emerald-500/10 text-emerald-500"
-                  : "bg-amber-500/10 text-amber-500"
-              )}
-            >
-              {!urlAnalysis.has_parameters ? "✓" : "✗"} Clean URL
-            </Badge>
+          {/* Right Column - URL Analysis */}
+          <div className="space-y-3">
+            <MetricRow
+              label="Is Readable"
+              value={<YesNoBadge value={urlAnalysis.is_readable} />}
+            />
+            <MetricRow
+              label="Has Keywords"
+              value={<YesNoBadge value={urlAnalysis.has_keywords} />}
+            />
+            <MetricRow
+              label="Uses Hyphens"
+              value={<YesNoBadge value={urlAnalysis.uses_hyphens} />}
+            />
+            <MetricRow
+              label="No Underscores"
+              value={<YesNoBadge value={!urlAnalysis.uses_underscores} warn={urlAnalysis.uses_underscores} />}
+            />
+            <MetricRow
+              label="Clean URL"
+              value={<YesNoBadge value={!urlAnalysis.has_parameters} />}
+            />
+            {structured_data.types.length > 0 && (
+              <div className="pt-2">
+                <p className="text-xs font-medium text-slate-500 mb-2">Structured Data Types:</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {structured_data.types.map((type, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200"
+                    >
+                      {type}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {urlAnalysis.issues.length > 0 && (
+              <div className="pt-2">
+                <p className="text-xs font-medium text-slate-500 mb-2">Issues:</p>
+                <ul className="space-y-1">
+                  {urlAnalysis.issues.map((issue, i) => (
+                    <li key={i} className="text-xs text-slate-600 list-disc list-inside">
+                      {issue}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-
-          {urlAnalysis.issues.length > 0 && (
-            <ul className="list-disc list-inside text-sm text-amber-600">
-              {urlAnalysis.issues.map((issue, i) => (
-                <li key={i}>{issue}</li>
-              ))}
-            </ul>
-          )}
         </div>
       </CardContent>
     </Card>

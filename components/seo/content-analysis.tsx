@@ -2,6 +2,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { FileText, Clock, Hash, TrendingUp } from "lucide-react";
 import type { ContentAnalysis as ContentAnalysisType, Headings } from "./types";
@@ -62,78 +70,103 @@ export function ContentAnalysis({ contentAnalysis, headings }: ContentAnalysisPr
           </div>
         </div>
 
-        {/* Readability Section */}
-        <div className="space-y-3">
-          <h4 className="text-sm font-medium text-muted-foreground">Readability</h4>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 sm:gap-6 p-4 bg-muted/50 rounded-lg">
-            <div className="flex-1 border-b sm:border-b-0 sm:border-r border-border pb-4 sm:pb-0 sm:pr-6">
-              <p className="text-xs text-muted-foreground mb-1">Flesch Reading Ease</p>
-              <p className="text-xl sm:text-2xl font-bold">{readability.flesch_reading_ease.toFixed(1)}</p>
-            </div>
-            <div className="flex-1 border-b sm:border-b-0 sm:border-r border-border pb-4 sm:pb-0 sm:pr-6">
-              <p className="text-xs text-muted-foreground mb-1">Flesch-Kincaid Grade</p>
-              <p className="text-xl sm:text-2xl font-bold">{readability.flesch_kincaid_grade.toFixed(1)}</p>
-            </div>
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground mb-1">Difficulty</p>
-              <Badge className={cn("mt-1 capitalize", getDifficultyColor(readability.difficulty))}>
-                {readability.difficulty.replace(/_/g, " ")}
-              </Badge>
+        {/* Top Keywords and Heading Structure - Side by side */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Top Keywords */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-muted-foreground">Top Keywords</h4>
+            <div className="rounded-lg border border-slate-200 overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-slate-50">
+                    <TableHead className="text-slate-900 font-semibold">Keyword</TableHead>
+                    <TableHead className="text-slate-900 font-semibold text-right">Count</TableHead>
+                    <TableHead className="text-slate-900 font-semibold text-right">Density</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {top_keywords.length > 0 ? (
+                    top_keywords.map((kw, i) => (
+                      <TableRow key={i} className="hover:bg-slate-50/50">
+                        <TableCell className="font-medium text-slate-900 capitalize">
+                          {kw.keyword}
+                        </TableCell>
+                        <TableCell className="text-slate-600 text-right">{kw.count}</TableCell>
+                        <TableCell className="text-slate-600 text-right">
+                          {kw.density.toFixed(2)}%
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center text-slate-500 py-8">
+                        No keywords found
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </div>
           </div>
-        </div>
 
-        {/* Top Keywords */}
-        <div className="space-y-3">
-          <h4 className="text-sm font-medium text-muted-foreground">Top Keywords</h4>
-          <div className="flex flex-wrap gap-2">
-            {top_keywords.map((kw, i) => (
-              <div
-                key={i}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20"
-              >
-                <span className="font-medium capitalize text-sm">{kw.keyword}</span>
-                <span className="text-xs text-muted-foreground">
-                  ({kw.count}x, {kw.density.toFixed(2)}%)
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+          {/* Heading Structure */}
+          <div className="space-y-3">
 
-        {/* Heading Structure */}
-        <div className="space-y-3">
-          <h4 className="text-sm font-medium text-muted-foreground">Heading Structure</h4>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-            {[
-              { label: "H1", count: headings.h1_count, warn: headings.h1_count !== 1 },
-              { label: "H2", count: headings.h2_count },
-              { label: "H3", count: headings.h3_count },
-              { label: "H4", count: headings.h4_count },
-              { label: "H5", count: headings.h5_count },
-              { label: "H6", count: headings.h6_count },
-            ].map((h) => (
-              <div
-                key={h.label}
-                className={cn(
-                  "text-center py-3 rounded-lg border",
-                  h.warn
-                    ? "border-amber-500 bg-amber-500/10"
-                    : "border-border bg-muted/50"
-                )}
-              >
-                <p className="text-xs text-muted-foreground uppercase">{h.label}</p>
-                <p className="text-lg sm:text-xl font-bold">{h.count}</p>
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-muted-foreground">Heading Structure</h4>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: "H1", count: headings.h1_count, warn: headings.h1_count !== 1 },
+                  { label: "H2", count: headings.h2_count },
+                  { label: "H3", count: headings.h3_count },
+                  { label: "H4", count: headings.h4_count },
+                  { label: "H5", count: headings.h5_count },
+                  { label: "H6", count: headings.h6_count },
+                ].map((h) => (
+                  <div
+                    key={h.label}
+                    className={cn(
+                      "text-center py-3 rounded-lg border",
+                      h.warn
+                        ? "border-amber-500 bg-amber-500/10"
+                        : "border-border bg-muted/50"
+                    )}
+                  >
+                    <p className="text-xs text-muted-foreground uppercase">{h.label}</p>
+                    <p className="text-lg sm:text-xl font-bold">{h.count}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+              {headings.issues.length > 0 && (
+                <ul className="list-disc list-inside text-sm text-amber-600 mt-2">
+                  {headings.issues.map((issue, i) => (
+                    <li key={i}>{issue}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            {/* Readability Section */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-muted-foreground">Readability</h4>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="flex-1 p-4 bg-muted/50 rounded-lg border border-border text-center">
+                  <p className="text-xs text-muted-foreground mb-1">Flesch Reading Ease</p>
+                  <p className="text-xl sm:text-2xl font-bold">{readability.flesch_reading_ease.toFixed(1)}</p>
+                </div>
+                <div className="flex-1 p-4 bg-muted/50 rounded-lg border border-border text-center">
+                  <p className="text-xs text-muted-foreground mb-1">Flesch-Kincaid Grade</p>
+                  <p className="text-xl sm:text-2xl font-bold">{readability.flesch_kincaid_grade.toFixed(1)}</p>
+                </div>
+                <div className="flex-1 p-4 bg-muted/50 rounded-lg border border-border text-center">
+                  <p className="text-xs text-muted-foreground mb-1">Difficulty</p>
+                  <Badge className={cn("mt-1 capitalize", getDifficultyColor(readability.difficulty))}>
+                    {readability.difficulty.replace(/_/g, " ")}
+                  </Badge>
+                </div>
+              </div>
+            </div>
           </div>
-          {headings.issues.length > 0 && (
-            <ul className="list-disc list-inside text-sm text-amber-600 mt-2">
-              {headings.issues.map((issue, i) => (
-                <li key={i}>{issue}</li>
-              ))}
-            </ul>
-          )}
+
         </div>
       </CardContent>
     </Card>

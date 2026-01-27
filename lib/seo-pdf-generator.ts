@@ -963,6 +963,105 @@ and accessibility.`;
     y = addTableRow(doc, "Performance Score", `${performance.score}%`, y, pageWidth);
     y += 5;
     
+    // Core Web Vitals
+    if (performance.lighthouse?.core_web_vitals) {
+      y = checkPageBreak(doc, y, pageHeight, 30);
+      y = addSubsectionHeader(doc, "Core Web Vitals", y);
+      
+      const cwv = performance.lighthouse.core_web_vitals;
+      const vitals = [
+        { key: "first-contentful-paint", label: "First Contentful Paint (FCP)", good: 1800, poor: 3000 },
+        { key: "largest-contentful-paint", label: "Largest Contentful Paint (LCP)", good: 2500, poor: 4000 },
+        { key: "total-blocking-time", label: "Total Blocking Time (TBT)", good: 200, poor: 600 },
+        { key: "cumulative-layout-shift", label: "Cumulative Layout Shift (CLS)", good: 0.1, poor: 0.25 },
+        { key: "speed-index", label: "Speed Index", good: 3400, poor: 5800 },
+        { key: "interactive", label: "Time to Interactive (TTI)", good: 3800, poor: 7300 },
+      ];
+      
+      vitals.forEach((vital) => {
+        const metric = cwv[vital.key];
+        if (metric && typeof metric.numericValue === "number") {
+          y = checkPageBreak(doc, y, pageHeight, 8);
+          const value = metric.numericValue;
+          const displayValue = metric.displayValue || formatTiming(value);
+          const status = value <= vital.good ? "good" : value <= vital.poor ? "needs-improvement" : "poor";
+          const statusColor = status === "good" ? COLORS.success : status === "needs-improvement" ? COLORS.warning : COLORS.error;
+          
+          doc.setFontSize(9);
+          doc.setTextColor(...COLORS.text);
+          doc.setFont("helvetica", "normal");
+          doc.text(vital.label, margin, y);
+          
+          doc.setFontSize(9);
+          doc.setTextColor(...statusColor);
+          doc.setFont("helvetica", "bold");
+          doc.text(displayValue, pageWidth - margin - 40, y, { align: "right" });
+          
+          // Status indicator
+          doc.setFillColor(...statusColor);
+          doc.circle(pageWidth - margin - 5, y - 1.5, 2, "F");
+          
+          y += 6;
+        }
+      });
+      y += 3;
+    }
+    
+    // Page Load Timeline (from screenshot data)
+    const lighthouseData = performance.lighthouse;
+    if (lighthouseData?.core_web_vitals?.["screenshot-thumbnails"]?.details?.items) {
+      y = checkPageBreak(doc, y, pageHeight, 40);
+      y = addSubsectionHeader(doc, "Page Load Timeline", y);
+      
+      const screenshots = lighthouseData.core_web_vitals["screenshot-thumbnails"].details.items;
+      const maxTime = Math.max(...screenshots.map((s: any) => s.timing || 0), performance.page_load_time_ms || 3000);
+      const timelineWidth = pageWidth - 2 * margin;
+      const timelineStartX = margin;
+      const timelineY = y;
+      
+      // Timeline axis
+      doc.setDrawColor(...COLORS.border);
+      doc.setLineWidth(0.5);
+      doc.line(timelineStartX, timelineY, timelineStartX + timelineWidth, timelineY);
+      
+      // Timeline markers
+      screenshots.forEach((screenshot: any) => {
+        const timing = screenshot.timing || 0;
+        const x = timelineStartX + (timing / maxTime) * timelineWidth;
+        
+        // Marker
+        doc.setFillColor(...COLORS.primary);
+        doc.circle(x, timelineY, 2, "F");
+        
+        // Timing label
+        doc.setFontSize(7);
+        doc.setTextColor(...COLORS.textLight);
+        doc.setFont("helvetica", "normal");
+        const labelY = timelineY - 4;
+        doc.text(formatTiming(timing), x, labelY, { align: "center" });
+      });
+      
+      // Final load time marker
+      if (performance.page_load_time_ms) {
+        const finalX = timelineStartX + (performance.page_load_time_ms / maxTime) * timelineWidth;
+        doc.setFillColor(...COLORS.success);
+        doc.circle(finalX, timelineY, 2.5, "F");
+        doc.setFontSize(7);
+        doc.setTextColor(...COLORS.success);
+        doc.setFont("helvetica", "bold");
+        doc.text(`Loaded: ${formatTiming(performance.page_load_time_ms)}`, finalX, timelineY - 4, { align: "center" });
+      }
+      
+      y = timelineY + 15;
+      
+      // Timeline legend
+      doc.setFontSize(8);
+      doc.setTextColor(...COLORS.textLight);
+      doc.setFont("helvetica", "normal");
+      doc.text("Note: Screenshot thumbnails are available in the web interface", margin, y);
+      y += 5;
+    }
+    
     if (performance.resources) {
       y = checkPageBreak(doc, y, pageHeight, 20);
       y = addSubsectionHeader(doc, "Resource Breakdown", y);

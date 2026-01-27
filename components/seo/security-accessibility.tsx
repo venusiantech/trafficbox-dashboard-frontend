@@ -2,6 +2,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import type { Security, Accessibility as AccessibilityType } from "./types";
 
@@ -10,140 +18,126 @@ interface SecurityAccessibilityProps {
   accessibility: AccessibilityType;
 }
 
-export function SecurityAccessibility({ security, accessibility }: SecurityAccessibilityProps) {
+function MetricRow({ label, value, valueColor }: { label: string; value: React.ReactNode; valueColor?: string }) {
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-semibold">Security & Accessibility</CardTitle>
+    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+      <span className="text-sm text-slate-700">{label}</span>
+      <span className={cn("text-sm font-medium", valueColor)}>{value}</span>
+    </div>
+  );
+}
+
+function YesNoBadge({ value }: { value: boolean }) {
+  return (
+    <Badge
+      className={cn(
+        "text-xs font-medium",
+        value
+          ? "bg-emerald-500 text-white"
+          : "bg-red-500 text-white"
+      )}
+    >
+      {value ? "Yes" : "No"}
+    </Badge>
+  );
+}
+
+export function SecurityAccessibility({ security, accessibility }: SecurityAccessibilityProps) {
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-emerald-500";
+    if (score >= 60) return "text-amber-500";
+    return "text-red-500";
+  };
+
+  const semanticHtmlEntries = Object.entries(accessibility.semantic_html).filter(([_, count]) => count > 0);
+
+  return (
+    <Card className="border-slate-200">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-xl font-semibold text-slate-900">Security & Accessibility</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="font-medium">Security</h4>
-              <Badge
-                className={cn(
-                  "border",
-                  security.score >= 80
-                    ? "bg-emerald-500/10 text-emerald-500"
-                    : security.score >= 60
-                    ? "bg-amber-500/10 text-amber-500"
-                    : "bg-red-500/10 text-red-500"
-                )}
-              >
-                {security.score}%
-              </Badge>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>Security Score</span>
-                <span className="font-medium">{security.score}%</span>
+          {/* Left Column - Security */}
+          <div className="space-y-3">
+            <MetricRow
+              label="HTTPS"
+              value={<YesNoBadge value={security.https} />}
+            />
+            <MetricRow
+              label="Security Score"
+              value={<span className={cn("text-sm font-medium", getScoreColor(security.score))}>{security.score}</span>}
+            />
+            {semanticHtmlEntries.length > 0 && (
+              <div className="pt-2">
+                <p className="text-xs font-medium text-slate-500 mb-2">Semantic HTML Elements:</p>
+                <div className="rounded-lg border border-slate-200 overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-slate-50">
+                        <TableHead className="text-slate-900 font-semibold text-xs h-8 py-1">Element</TableHead>
+                        <TableHead className="text-slate-900 font-semibold text-xs h-8 py-1 text-right">Count</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {semanticHtmlEntries.map(([tag, count]) => (
+                        <TableRow key={tag} className="hover:bg-slate-50/50">
+                          <TableCell className="text-xs text-slate-700 py-2">
+                            &lt;{tag}&gt;
+                          </TableCell>
+                          <TableCell className="text-xs text-slate-700 text-right py-2">
+                            {count}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div
-                  className={cn(
-                    "h-2 rounded-full transition-all",
-                    security.score >= 80
-                      ? "bg-emerald-500"
-                      : security.score >= 60
-                      ? "bg-amber-500"
-                      : "bg-red-500"
-                  )}
-                  style={{ width: `${security.score}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-              <div
-                className={cn(
-                  "w-3 h-3 rounded-full",
-                  security.https ? "bg-emerald-500" : "bg-red-500"
-                )}
-              />
-              <div>
-                <p className="text-sm font-medium">HTTPS</p>
-                <p className="text-xs text-muted-foreground">
-                  {security.https ? "Secure connection enabled" : "Not using HTTPS"}
-                </p>
-              </div>
-            </div>
-
+            )}
             {security.issues.length > 0 && (
-              <ul className="list-disc list-inside text-sm text-amber-600">
-                {security.issues.map((issue, i) => (
-                  <li key={i}>{issue}</li>
-                ))}
-              </ul>
+              <div className="pt-2">
+                <p className="text-xs font-medium text-slate-500 mb-2">Issues:</p>
+                <ul className="space-y-1">
+                  {security.issues.map((issue, i) => (
+                    <li key={i} className="text-xs text-slate-600 list-disc list-inside">
+                      {issue}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="font-medium">Accessibility</h4>
-              <Badge
-                className={cn(
-                  "border",
-                  accessibility.score >= 80
-                    ? "bg-emerald-500/10 text-emerald-500"
-                    : accessibility.score >= 60
-                    ? "bg-amber-500/10 text-amber-500"
-                    : "bg-red-500/10 text-red-500"
-                )}
-              >
-                {accessibility.score}%
-              </Badge>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>Accessibility Score</span>
-                <span className="font-medium">{accessibility.score}%</span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div
-                  className={cn(
-                    "h-2 rounded-full transition-all",
-                    accessibility.score >= 80
-                      ? "bg-emerald-500"
-                      : accessibility.score >= 60
-                      ? "bg-amber-500"
-                      : "bg-red-500"
-                  )}
-                  style={{ width: `${accessibility.score}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-muted/50 rounded-lg text-center">
-                <p className="text-xl font-bold">{accessibility.aria_labels}</p>
-                <p className="text-xs text-muted-foreground">ARIA Labels</p>
-              </div>
-              <div className="p-3 bg-muted/50 rounded-lg text-center">
-                <p className="text-xl font-bold">{accessibility.alt_text_coverage}%</p>
-                <p className="text-xs text-muted-foreground">Alt Text Coverage</p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">Semantic HTML Elements</p>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(accessibility.semantic_html).map(([tag, count]) => (
-                  <Badge key={tag} color="secondary" className="text-xs">
-                    &lt;{tag}&gt; × {count}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
+          {/* Right Column - Accessibility */}
+          <div className="space-y-3">
+            <MetricRow
+              label="ARIA Labels"
+              value={<span className="text-sm text-slate-700">{accessibility.aria_labels}</span>}
+            />
+            <MetricRow
+              label="Alt Text Coverage"
+              value={<span className="text-sm text-slate-700">{accessibility.alt_text_coverage}%</span>}
+            />
+            <MetricRow
+              label="Form Labels"
+              value={<span className="text-sm text-slate-700">{accessibility.form_labels}</span>}
+            />
+            <MetricRow
+              label="Accessibility Score"
+              value={<span className={cn("text-sm font-medium", getScoreColor(accessibility.score))}>{accessibility.score}</span>}
+            />
             {accessibility.issues.length > 0 && (
-              <ul className="list-disc list-inside text-sm text-amber-600">
-                {accessibility.issues.map((issue, i) => (
-                  <li key={i}>{issue}</li>
-                ))}
-              </ul>
+              <div className="pt-2">
+                <p className="text-xs font-medium text-slate-500 mb-2">Issues:</p>
+                <ul className="space-y-1">
+                  {accessibility.issues.map((issue, i) => (
+                    <li key={i} className="text-xs text-slate-600 list-disc list-inside">
+                      {issue}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         </div>

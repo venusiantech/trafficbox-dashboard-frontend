@@ -55,18 +55,18 @@ export function OverallScoreCard({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* SEO Analysis Report Header Card */}
       <Card className="overflow-hidden">
-        <CardContent className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="flex-1 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-1 h-6 bg-purple-600 rounded-full flex-shrink-0" />
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">SEO Analysis Report</h2>
+        <CardContent className="p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
+            <div className="flex-1 space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-1 h-8 bg-purple-600 rounded-full flex-shrink-0" />
+                <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">SEO Analysis Report</h2>
               </div>
               
-              <div className="space-y-3 sm:space-y-4 text-sm sm:text-base ml-4">
+              <div className="space-y-4 sm:space-y-5 text-sm sm:text-base ml-5">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                   <span className="font-medium text-gray-600 min-w-[80px]">URL:</span>
                   <a
@@ -122,13 +122,13 @@ export function OverallScoreCard({
 
       {/* Overall Score Card with Category Scores */}
       <Card className="overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-3 mb-6">
-            <div className="w-1 h-6 bg-purple-600 rounded-full" />
-            <h2 className="text-xl font-semibold text-gray-800">Overall Score</h2>
+        <CardContent className="p-6 sm:p-8">
+          <div className="flex items-start gap-4 mb-8">
+            <div className="w-1 h-8 bg-purple-600 rounded-full" />
+            <h2 className="text-2xl font-semibold text-gray-800">Overall Score</h2>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-10">
             {/* Left Side - Overall Score */}
             <div className="w-full lg:w-[30%] my-auto text-center space-y-4">
               <div className="text-6xl font-bold text-gray-800">{totalScore}</div>

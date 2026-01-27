@@ -2,9 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
-import { Link2, ExternalLink, CheckCircle2, XCircle, Image as ImageIcon, Loader2, AlertCircle } from "lucide-react";
+import { Link2, ExternalLink, CheckCircle2, XCircle, Loader2, AlertCircle } from "lucide-react";
 import type { Links, Images } from "./types";
 
 interface LinksImagesProps {
@@ -31,29 +29,29 @@ export function LinksImages({ links, images }: LinksImagesProps) {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
-                <div className="p-2 rounded-lg bg-blue-500/10 flex-shrink-0">
-                  <Link2 className="w-5 h-5 text-blue-500" />
+                <div className="p-2 rounded-lg bg-primary-500/10 flex-shrink-0">
+                  <Link2 className="w-5 h-5 text-primary-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xl font-bold text-blue-500">{links.internal}</p>
+                  <p className="text-xl font-bold text-primary-500">{links.internal}</p>
                   <p className="text-xs text-muted-foreground">Internal</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
-                <div className="p-2 rounded-lg bg-purple-500/10 flex-shrink-0">
-                  <ExternalLink className="w-5 h-5 text-purple-500" />
+                <div className="p-2 rounded-lg bg-primary-500/10 flex-shrink-0">
+                  <ExternalLink className="w-5 h-5 text-primary-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xl font-bold text-purple-500">{links.external}</p>
+                  <p className="text-xl font-bold text-primary-500">{links.external}</p>
                   <p className="text-xs text-muted-foreground">External</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
-                <div className="p-2 rounded-lg bg-emerald-500/10 flex-shrink-0">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                <div className="p-2 rounded-lg bg-primary-500/10 flex-shrink-0">
+                  <CheckCircle2 className="w-5 h-5 text-primary-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xl font-bold text-emerald-500">{links.dofollow || 0}</p>
+                  <p className="text-xl font-bold text-primary-500">{links.dofollow || 0}</p>
                   <p className="text-xs text-muted-foreground">Dofollow</p>
                 </div>
               </div>
@@ -78,8 +76,8 @@ export function LinksImages({ links, images }: LinksImagesProps) {
             {links.issues && links.issues.length > 0 && (
               <div className="space-y-1">
                 {links.issues.map((issue, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm text-amber-600">
-                    <span className="text-amber-500 mt-0.5">•</span>
+                  <div key={i} className="flex items-start gap-2 text-sm text-slate-600">
+                    <span className="text-slate-500 mt-0.5">•</span>
                     <span>{issue}</span>
                   </div>
                 ))}
@@ -96,11 +94,11 @@ export function LinksImages({ links, images }: LinksImagesProps) {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
-                <div className="p-2 rounded-lg bg-emerald-500/10 flex-shrink-0">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                <div className="p-2 rounded-lg bg-primary-500/10 flex-shrink-0">
+                  <CheckCircle2 className="w-5 h-5 text-primary-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xl font-bold text-emerald-500">{images.with_alt}</p>
+                  <p className="text-xl font-bold text-primary-500">{images.with_alt}</p>
                   <p className="text-xs text-muted-foreground">With Alt Text</p>
                 </div>
               </div>
@@ -115,29 +113,19 @@ export function LinksImages({ links, images }: LinksImagesProps) {
               </div>
             </div>
 
-            <div className="space-y-2 p-4 bg-muted/50 rounded-lg">
+            <div className="p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Alt Text Coverage</span>
-                <span className={cn(
-                  "font-semibold",
-                  altTextCoverage >= 90 ? "text-emerald-500" : altTextCoverage >= 70 ? "text-amber-500" : "text-red-500"
-                )}>
+                <span className="font-semibold text-primary-500">
                   {altTextCoverage.toFixed(0)}%
                 </span>
               </div>
-              <Progress 
-                value={altTextCoverage} 
-                className={cn(
-                  "h-2",
-                  altTextCoverage >= 90 ? "[&>div]:bg-emerald-500" : altTextCoverage >= 70 ? "[&>div]:bg-amber-500" : "[&>div]:bg-red-500"
-                )}
-              />
             </div>
-          </div>
-          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+
+            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/10">
-                  <Loader2 className="w-5 h-5 text-blue-500" />
+                <div className="p-2 rounded-lg bg-primary-500/10">
+                  <Loader2 className="w-5 h-5 text-primary-500" />
                 </div>
                 <span className="text-sm font-medium">Lazy Loaded</span>
               </div>
@@ -147,13 +135,14 @@ export function LinksImages({ links, images }: LinksImagesProps) {
             {images.issues && images.issues.length > 0 && (
               <div className="space-y-1">
                 {images.issues.map((issue, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm text-amber-600">
-                    <span className="text-amber-500 mt-0.5">•</span>
+                  <div key={i} className="flex items-start gap-2 text-sm text-slate-600">
+                    <span className="text-slate-500 mt-0.5">•</span>
                     <span>{issue}</span>
                   </div>
                 ))}
               </div>
             )}
+          </div>
         </div>
       </CardContent>
     </Card>

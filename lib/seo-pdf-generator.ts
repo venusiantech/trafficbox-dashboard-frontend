@@ -26,33 +26,55 @@ const COLORS = {
  */
 async function loadImageAsBase64(path: string): Promise<string> {
   return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    
-    img.onload = () => {
-      try {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          resolve(canvas.toDataURL("image/png"));
-        } else {
-          resolve("");
+    // Try fetch first (more reliable)
+    fetch(path)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      } catch (error) {
-        console.error("Error converting image to base64:", error);
-        resolve("");
-      }
-    };
-    
-    img.onerror = () => {
-      console.warn("Could not load logo image:", path);
-      resolve("");
-    };
-    
-    img.src = path;
+        return response.blob();
+      })
+      .then((blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.onerror = () => {
+          console.warn("Error reading logo blob");
+          resolve("");
+        };
+        reader.readAsDataURL(blob);
+      })
+      .catch(() => {
+        // Fallback to Image approach
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        
+        img.onload = () => {
+          try {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              ctx.drawImage(img, 0, 0);
+              resolve(canvas.toDataURL("image/png"));
+            } else {
+              resolve("");
+            }
+          } catch (error) {
+            console.error("Error converting image to base64:", error);
+            resolve("");
+          }
+        };
+        
+        img.onerror = () => {
+          console.warn("Could not load logo image:", path);
+          resolve("");
+        };
+        
+        img.src = path;
+      });
   });
 }
 
@@ -120,67 +142,79 @@ export async function generateSEOPDF(
   let currentPage = 1;
 
   // ========== COVER PAGE ==========
-  // Load and add logo
-  const logoPath = "/logo/trafficboxes_logo_full.png";
+  // Draw a simple, clean blue header bar
+  doc.setFillColor(...COLORS.primary);
+  doc.rect(0, 0, pageWidth, 55, "F");
+
+  // Add logo to the top left
+  const logoPath = "/logo/trafficboxes_logo_full_dark.png";
   try {
     const logoData = await loadImageAsBase64(logoPath);
-    if (logoData) {
-      // Add logo to top left (20mm from left, 15mm from top)
-      // Logo size: 40mm width, height will be calculated automatically to maintain aspect ratio
-      const logoWidth = 40;
-      doc.addImage(logoData, "PNG", 20, 15, logoWidth, 0, undefined, "FAST");
+    if (logoData && logoData.length > 0) {
+      // Place logo at (12,13) with width 32mm, height auto
+      doc.addImage(logoData, "PNG", 12, 13, 32, 0, undefined, "FAST");
     }
-  } catch (error) {
-    console.warn("Could not load logo:", error);
+  } catch {
+    // Fail silently if logo cannot be added
   }
-  
-  doc.setFillColor(...COLORS.primary);
-  doc.rect(0, 0, pageWidth, 60, "F");
-  
-  doc.setFontSize(28);
-  doc.setTextColor(255, 255, 255);
+
+  // Add main report title centered in white
   doc.setFont("helvetica", "bold");
-  doc.text("SEO Analysis Report", pageWidth / 2, 35, { align: "center" });
-  
-  doc.setFontSize(12);
+  doc.setFontSize(22);
+  doc.setTextColor(255, 255, 255);
+  doc.text("SEO Analysis Report", pageWidth / 2, 30, { align: "center" });
+
+  // Add subtitle centered beneath the title
   doc.setFont("helvetica", "normal");
-  doc.text("Comprehensive Website Performance Analysis", pageWidth / 2, 45, { align: "center" });
+  doc.setFontSize(10);
+  doc.text("Comprehensive Website Performance Analysis", pageWidth / 2, 40, { align: "center" });
+
   
   y = 80;
-  
+
+  // Simplified Cover Info Layout: show each label on its own line above its value
+
   // URL
-  doc.setFontSize(10);
+  doc.setFontSize(14);
   doc.setTextColor(...COLORS.text);
   doc.setFont("helvetica", "bold");
   doc.text("Analyzed URL:", margin, y);
+  y += 7;
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...COLORS.textLight);
   const urlText = data.url || "N/A";
-  const urlLines = doc.splitTextToSize(urlText, pageWidth - 2 * margin - 35);
-  doc.text(urlLines, margin + 35, y);
-  y += urlLines.length * 4 + 8;
-  
+  const urlLines = doc.splitTextToSize(urlText, pageWidth - 2 * margin);
+  doc.text(urlLines, margin, y);
+  y += urlLines.length * 7 + 4;
+
   // Analysis Date
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...COLORS.text);
   doc.text("Analysis Date:", margin, y);
+  y += 7;
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...COLORS.textLight);
-  doc.text(new Date(data.createdAt).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }), margin + 35, y);
-  y += 8;
-  
+  doc.text(
+    new Date(data.createdAt).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }),
+    margin,
+    y
+  );
+  y += 11;
+
   // Processing Time
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...COLORS.text);
   doc.text("Processing Time:", margin, y);
+  y += 7;
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...COLORS.textLight);
-  doc.text(`${(data.processingTime / 1000).toFixed(2)}s`, margin + 35, y);
-  
+  doc.text(`${(data.processingTime / 1000).toFixed(2)}s`, margin, y);
+  y += 11;
+
   // ========== CAPTURE COMPONENT SCREENSHOTS ==========
   // Component selectors based on data attributes we'll add to the page
   const componentSelectors = [
@@ -197,6 +231,11 @@ export async function generateSEOPDF(
     '[data-pdf-component="screenshots"]',
     '[data-pdf-component="recommendations"]',
   ];
+  
+  // Start components on page 2 (add new page before overall-score)
+  doc.addPage();
+  currentPage = 2;
+  y = margin;
   
   // Capture each component
   for (const selector of componentSelectors) {
@@ -239,7 +278,7 @@ export async function generateSEOPDF(
       // Add image to PDF
       const x = (pageWidth - displayWidth) / 2;
       doc.addImage(dataUrl, "PNG", x, y, displayWidth, displayHeight, undefined, "FAST");
-      
+
       // Update y position
       y = y + displayHeight + spacing;
     } catch (error) {
@@ -247,13 +286,13 @@ export async function generateSEOPDF(
       // Continue with next component even if one fails
     }
   }
-  
+
   // Add footer to all pages (only once at the end to avoid duplication)
   const finalPageCount = doc.internal.getNumberOfPages();
   for (let i = 1; i <= finalPageCount; i++) {
     doc.setPage(i);
     addFooter(doc, pageWidth, pageHeight, i, finalPageCount);
   }
-  
+
   return doc.output("blob");
 }

@@ -389,11 +389,23 @@ export default function CampaignsListPage() {
               <div className="flex gap-4">
                 <div>
                   <span className="text-gray-500 dark:text-gray-400">Min</span>
-                  <span className="ml-1 font-semibold text-gray-900 dark:text-gray-100">16 min</span>
+                  <span className="ml-1 font-semibold text-gray-900 dark:text-gray-100">
+                    {campaign.duration_min 
+                      ? campaign.duration_min < 60 
+                        ? `${campaign.duration_min} sec` 
+                        : `${Math.round(campaign.duration_min / 60)} min`
+                      : 'N/A'}
+                  </span>
                 </div>
                 <div>
                   <span className="text-gray-500 dark:text-gray-400">Max</span>
-                  <span className="ml-1 font-semibold text-gray-900 dark:text-gray-100">1 min</span>
+                  <span className="ml-1 font-semibold text-gray-900 dark:text-gray-100">
+                    {campaign.duration_max 
+                      ? campaign.duration_max < 60 
+                        ? `${campaign.duration_max} sec` 
+                        : `${Math.round(campaign.duration_max / 60)} min`
+                      : 'N/A'}
+                  </span>
                 </div>
               </div>
             </div>

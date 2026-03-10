@@ -5,15 +5,13 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "@/components/ui/use-toast";
 import { useTranslations } from "next-intl";
 import { useCampaignStore } from "@/context/campaignStore";
 import PageTitle from "@/components/page-title";
 import { StatisticsBlock } from "@/components/blocks/statistics-block";
-import { Pencil, Loader2, Clock, Globe, Code, Settings as SettingsIcon, Shield, Coins, Archive, Trash2, CreditCard } from "lucide-react";
+import { Pencil, Loader2, Clock, Globe, Code } from "lucide-react";
 
 export default function CampaignDetailPage({ params }: { params: { id: string } }) {
   const t = useTranslations("AnalyticsDashboard");
@@ -366,8 +364,6 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               </div>
             </div>
 
-            <Separator />
-
             {/* Countries */}
             <div className="space-y-1">
               <div className="flex items-center gap-2 mb-2">
@@ -421,68 +417,6 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
           </div>
         </Card>
 
-        {/* Settings */}
-        <Card className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <SettingsIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            <h3 className="text-lg font-semibold">Settings</h3>
-          </div>
-
-          <div className="space-y-1">
-            {/* Adult Content */}
-            <div className="flex items-center justify-between py-3 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-              <div className="flex items-center gap-3">
-                <Shield className="h-4 w-4 text-gray-400" />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Adult Content</span>
-              </div>
-              <Switch checked={currentCampaign.is_adult} disabled />
-            </div>
-
-            <Separator />
-
-            {/* Coin Mining */}
-            <div className="flex items-center justify-between py-3 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-              <div className="flex items-center gap-3">
-                <Coins className="h-4 w-4 text-gray-400" />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Coin Mining</span>
-              </div>
-              <Switch checked={currentCampaign.is_coin_mining} disabled />
-            </div>
-
-            <Separator />
-
-            {/* Archived */}
-            <div className="flex items-center justify-between py-3 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-              <div className="flex items-center gap-3">
-                <Archive className="h-4 w-4 text-gray-400" />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Archived</span>
-              </div>
-              <Switch checked={currentCampaign.is_archived} disabled />
-            </div>
-
-            <Separator />
-
-            {/* Delete Eligible */}
-            <div className="flex items-center justify-between py-3 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-              <div className="flex items-center gap-3">
-                <Trash2 className="h-4 w-4 text-gray-400" />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Delete Eligible</span>
-              </div>
-              <Switch checked={currentCampaign.delete_eligible} disabled />
-            </div>
-
-            <Separator />
-
-            {/* Credit Deduction */}
-            <div className="flex items-center justify-between py-3 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-              <div className="flex items-center gap-3">
-                <CreditCard className="h-4 w-4 text-gray-400" />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Credit Deduction</span>
-              </div>
-              <Switch checked={currentCampaign.credit_deduction_enabled || false} disabled />
-            </div>
-          </div>
-        </Card>
       </div>
     </div>
   );

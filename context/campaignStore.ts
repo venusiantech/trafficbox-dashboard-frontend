@@ -86,6 +86,8 @@ export type CampaignModifyData = {
   click_outbound_events?: number;
   form_submit_events?: number;
   scroll_events?: number;
+  is_adult?: boolean;
+  is_coin_mining?: boolean;
 };
 
 // Define user stats type

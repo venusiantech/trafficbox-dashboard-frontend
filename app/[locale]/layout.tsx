@@ -34,7 +34,7 @@ export default async function RootLayout({
           <AuthProvider>
             <ThemeProvider
               attribute="class"
-              forcedTheme="light"
+              forcedTheme="dark"
               disableTransitionOnChange
             >
               <MountedProvider>
